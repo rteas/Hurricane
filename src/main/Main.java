@@ -17,7 +17,7 @@ public class Main extends StateBasedGame{
 		
 		try 
 		{
-			appgc = new AppGameContainer(new Main("Default Title")); // Set title
+			appgc = new AppGameContainer(new Main("Prisoner of Anorahh")); // Set title
 			appgc.setDisplayMode(1366, 768, false); // Display parameters
 			appgc.setAlwaysRender(true); // Constant rendering
 			appgc.start();

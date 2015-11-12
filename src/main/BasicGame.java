@@ -18,26 +18,31 @@ public class BasicGame extends BasicGameState {
 	// used to deterimine direction
 	public static final char UP = 'U', DOWN = 'D', LEFT='L', RIGHT='R';
 	
-	private Rectangle square;
-	private Rectangle obstacle;
+//	private Rectangle square;
+//	private Rectangle obstacle;
 	
 	private char direction = 'R';
 	
+	// Starting location (of sprite)
 	private float x = 100;
 	private float y = 100;
-	boolean collide = false;
+	
+//	boolean collide = false;
+	
 	private SpriteSheet protagRight, pIdleRight,
 	protagLeft, pIdleLeft,
 	protagUp, pIdleUp,
 	protagDown, pIdleDown;
 	
 	private Animation walkRight, walkLeft, walkDown, walkUp;
+	
 	private boolean still = true;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
-		square = new Rectangle(25,25, 200,200);
+		
+		// square = new Rectangle(25,25, 200,200);
 		
 		// Protagonist Sprite and Animations
 		
