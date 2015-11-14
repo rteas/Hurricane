@@ -36,7 +36,7 @@ public class BasicGame extends BasicGameState {
 	
 	private Animation walkRight, walkLeft, walkDown, walkUp;
 	
-	private boolean still = true;
+	private boolean idle = true;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
@@ -69,7 +69,7 @@ public class BasicGame extends BasicGameState {
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// TODO Auto-generated method stub
-		if(still){
+		if(idle){
 			switch(direction){
 			case UP: pIdleUp.draw(x,y);break;
 			case DOWN: pIdleDown.draw(x,y);break;
@@ -107,27 +107,27 @@ public class BasicGame extends BasicGameState {
 		Input input = gc.getInput();		
 		
 		if(input.isKeyDown(Input.KEY_W)){
-			still = false;
+			idle = false;
 			y -= 200/1000.0f*d;
 			setDirection(UP);
 		}
 		else if(input.isKeyDown(Input.KEY_A)){
-			still = false;
+			idle = false;
 			x -= 200/1000.0f*d;
 			setDirection(LEFT);
 		}
-		else if(input.isKeyDown(Input.KEY_D)){
-			x += 200/1000.0f*d;
-			still = false;
-			setDirection(RIGHT);
-		}
 		else if(input.isKeyDown(Input.KEY_S)){
 			y += 200/1000.0f*d;
-			still = false;
+			idle = false;
 			setDirection(DOWN);
 		}
+		else if(input.isKeyDown(Input.KEY_D)){
+			x += 200/1000.0f*d;
+			idle = false;
+			setDirection(RIGHT);
+		}
 		else{
-			still = true;
+			idle = true;
 		}
 
 	}
