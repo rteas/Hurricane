@@ -18,6 +18,7 @@ public class BasicGame extends BasicGameState {
 	// used to deterimine direction
 	public static final char UP = 'U', DOWN = 'D', LEFT='L', RIGHT='R';
 	
+	public String attackDirection = "null";
 //	private Rectangle square;
 //	private Rectangle obstacle;
 	
@@ -26,17 +27,25 @@ public class BasicGame extends BasicGameState {
 	// Starting location (of sprite)
 	private float x = 100;
 	private float y = 100;
+	private int tileSize = 100;
+	private float destinationX;
+	private float destinationY;
+	private float clickX = 0;
+	private float clickY = 0;
+	
 	
 //	boolean collide = false;
 	
 	private SpriteSheet protagRight, pIdleRight,
 	protagLeft, pIdleLeft,
 	protagUp, pIdleUp,
-	protagDown, pIdleDown;
+	protagDown, pIdleDown,
+	slashRight, slashLeft, slashUp, slashDown;
 	
-	private Animation walkRight, walkLeft, walkDown, walkUp;
+	private Animation walkRight, walkLeft, walkDown, walkUp, rightAtk;
 	
 	private boolean idle = true;
+	private boolean attack = false;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
@@ -48,35 +57,69 @@ public class BasicGame extends BasicGameState {
 		
 		protagRight = new SpriteSheet("protagImg/walkRight.png",100,100);
 		pIdleRight = new SpriteSheet("protagImg/idleRight.png",100,100);
-		walkRight = new Animation(protagRight, 200);
+		walkRight = new Animation(protagRight, 150);
 
 		protagLeft = new SpriteSheet("protagImg/walkLeft.png",100,100);
 		pIdleLeft = new SpriteSheet("protagImg/idleLeft.png",100,100);
-		walkLeft = new Animation(protagLeft, 200);
+		walkLeft = new Animation(protagLeft, 150);
 		
 		protagDown = new SpriteSheet("protagImg/walkDown.png",100,100);
 		pIdleDown = new SpriteSheet("protagImg/idleDown.png",100,100);
-		walkDown = new Animation(protagDown, 250);
+		walkDown = new Animation(protagDown, 150);
 		
 		protagUp = new SpriteSheet("protagImg/walkUp.png",100,100);
 		pIdleUp = new SpriteSheet("protagImg/idleUp.png",100,100);
-		walkUp = new Animation(protagUp, 250);
+		walkUp = new Animation(protagUp, 150);
 		
+		
+		slashRight = new SpriteSheet("protagImg/slashRight.png",100,100);
+		slashLeft = new SpriteSheet("protagImg/slashLeft.png",100,100);
+		slashUp = new SpriteSheet("protagImg/slashUp.png",100,100);
+		slashDown = new SpriteSheet("protagImg/slashDown.png",100,100);
+
 		//===============================================================================================
-		
 	}
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// TODO Auto-generated method stub
-		if(idle){
+		
+		// Status/Debug
+		g.drawString("Current Coordinates: \n" + "X: " + x + " Y: "+ y, 200, 0);
+		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
+		g.drawString("Attack: " + attackDirection, 400, 0);
+		// Grid
+		g.drawRect(x, y, tileSize, tileSize);
+		
+		if(attack){
+			if(attackDirection == "Right"){
+				pIdleRight.draw(x,y);
+				slashRight.draw(x+100, y);
+				direction = RIGHT;
+			}
+			else if(attackDirection == "Left"){
+				pIdleLeft.draw(x,y);
+				slashLeft.draw(x-100,y);
+				direction = LEFT;
+			}
+			else if(attackDirection == "Up"){
+				pIdleUp.draw(x,y);
+				slashUp.draw(x,y-100);
+				direction = UP;
+			}
+			else{
+				pIdleDown.draw(x,y);
+				slashDown.draw(x,y+100);
+				direction = DOWN;
+			}
+		}
+		else if(idle){
 			switch(direction){
 			case UP: pIdleUp.draw(x,y);break;
 			case DOWN: pIdleDown.draw(x,y);break;
 			case LEFT: pIdleLeft.draw(x,y);break;
 			case RIGHT: pIdleRight.draw(x,y);break;
 			}
-			//pIdleRight.draw(x, y);
 		}
 		else{
 			switch(direction){
@@ -85,8 +128,15 @@ public class BasicGame extends BasicGameState {
 			case LEFT: walkLeft.draw(x,y);break;
 			case RIGHT: walkRight.draw(x,y);break;
 			}
-			//walkRight.draw(x,y);
 		}
+		
+		/*
+		if(attackDirection == "Right"){
+			rightAtk.draw(x+100, y);
+			attackDirection = "null";
+		}
+		*/
+
 		
 		// Some tutorial stuff
 		/*
@@ -104,31 +154,19 @@ public class BasicGame extends BasicGameState {
 		// TODO Auto-generated method stub
 		
 		// 'WASD' MOVEMENT
-		Input input = gc.getInput();		
-		
-		if(input.isKeyDown(Input.KEY_W)){
-			idle = false;
-			y -= 200/1000.0f*d;
-			setDirection(UP);
+		if(attack){
+			gc.sleep(500);
+			attack = false;
 		}
-		else if(input.isKeyDown(Input.KEY_A)){
-			idle = false;
-			x -= 200/1000.0f*d;
-			setDirection(LEFT);
-		}
-		else if(input.isKeyDown(Input.KEY_S)){
-			y += 200/1000.0f*d;
-			idle = false;
-			setDirection(DOWN);
-		}
-		else if(input.isKeyDown(Input.KEY_D)){
-			x += 200/1000.0f*d;
-			idle = false;
-			setDirection(RIGHT);
+		if(idle){
+			Input input = gc.getInput();
+			setMove(input, d);
+			getAttack(input);
 		}
 		else{
-			idle = true;
+			moveGrid(direction,destinationX,destinationY,d);
 		}
+
 
 	}
 
@@ -143,6 +181,94 @@ public class BasicGame extends BasicGameState {
 	// Sets the direction of the character 
 	public void setDirection(char direction){
 		this.direction = direction;
+	}
+	
+	public void getAttack(Input input){
+		if(input.isMousePressed(input.MOUSE_LEFT_BUTTON)){
+			clickX = input.getMouseX();
+			clickY = input.getMouseY();
+			// Decide direction
+			
+			if(clickX <= x && clickY >= y && clickY <= y+tileSize){
+				attackDirection = "Left";
+				attack = true;
+			}
+			else if(clickX >= x+tileSize && clickY >= y && clickY <= y+tileSize){
+				attackDirection = "Right";
+				attack = true;
+			}
+			else if(clickY <= y && clickX >= x && clickX <= x+tileSize){
+				attackDirection="Up";
+				attack = true;
+			}
+			else if(clickY >= y+tileSize && clickX >= x && clickX <= x+tileSize){
+				attackDirection="Down";
+				attack = true;
+			}
+			else{
+				attackDirection="Unaccepted";
+			}
+			
+		}
+	}
+	
+	// Continue moving one grid in the x/y direction
+	public void moveGrid(char direction,float destinationX, float destinationY, int d){
+		switch(direction){
+		case UP: 
+			if(y>=destinationY)
+				y -= 200/1000.0f*d;		
+			else
+				idle=true;
+			break;
+		case DOWN: 			
+			if(y<=destinationY)
+				y += 200/1000.0f*d;
+			else
+				idle=true;
+
+			break;
+		case LEFT: 
+			if(x>=destinationX)
+				x -= 200/1000.0f*d;
+			else
+				idle=true;
+			break;
+		case RIGHT:
+			if(x<=destinationX)
+				x += 200/1000.0f*d;
+			else
+				idle=true;
+			break;
+		}
+	}
+	
+	
+	// Initial movement
+	public void setMove(Input input, int d){
+		if(input.isKeyDown(Input.KEY_W)){
+			destinationY = y-tileSize;
+			idle = false;
+			setDirection(UP);
+		}
+		else if(input.isKeyDown(Input.KEY_A)){
+			destinationX = x-tileSize;
+			idle = false;
+			setDirection(LEFT);
+		}
+		else if(input.isKeyDown(Input.KEY_S)){
+			destinationY = y+tileSize;
+			idle = false;
+			setDirection(DOWN);
+		}
+		else if(input.isKeyDown(Input.KEY_D)){
+			destinationX = x+tileSize;
+			idle = false;
+			setDirection(RIGHT);
+		}
+		else{
+			idle = true;
+		}
 	}
 
 }
