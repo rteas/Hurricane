@@ -18,11 +18,11 @@ public class BasicGame extends BasicGameState {
 	// used to deterimine direction
 	public static final char UP = 'U', DOWN = 'D', LEFT='L', RIGHT='R';
 	
-	public String attackDirection = "null";
+	private char direction = 'R';
+	private char attackDirection = 'N';
 //	private Rectangle square;
 //	private Rectangle obstacle;
 	
-	private char direction = 'R';
 	
 	// Starting location (of sprite)
 	private float x = 100;
@@ -54,7 +54,7 @@ public class BasicGame extends BasicGameState {
 		// square = new Rectangle(25,25, 200,200);
 		
 		// Protagonist Sprite and Animations
-		
+		gc.setVSync(true);
 		protagRight = new SpriteSheet("protagImg/walkRight.png",100,100);
 		pIdleRight = new SpriteSheet("protagImg/idleRight.png",100,100);
 		walkRight = new Animation(protagRight, 150);
@@ -92,25 +92,25 @@ public class BasicGame extends BasicGameState {
 		g.drawRect(x, y, tileSize, tileSize);
 		
 		if(attack){
-			if(attackDirection == "Right"){
+			if(attackDirection == 'R'){
 				pIdleRight.draw(x,y);
-				slashRight.draw(x+100, y);
-				direction = RIGHT;
+				slashRight.draw(x+tileSize, y);
+				direction = attackDirection;
 			}
-			else if(attackDirection == "Left"){
+			else if(attackDirection == 'L'){
 				pIdleLeft.draw(x,y);
-				slashLeft.draw(x-100,y);
-				direction = LEFT;
+				slashLeft.draw(x-tileSize,y);
+				direction = attackDirection;
 			}
-			else if(attackDirection == "Up"){
+			else if(attackDirection == 'U'){
 				pIdleUp.draw(x,y);
-				slashUp.draw(x,y-100);
-				direction = UP;
+				slashUp.draw(x,y-tileSize);
+				direction = attackDirection;
 			}
 			else{
 				pIdleDown.draw(x,y);
-				slashDown.draw(x,y+100);
-				direction = DOWN;
+				slashDown.draw(x,y+tileSize);
+				direction = attackDirection;
 			}
 		}
 		else if(idle){
@@ -153,18 +153,17 @@ public class BasicGame extends BasicGameState {
 	public void update(GameContainer gc, StateBasedGame sbg, int d) throws SlickException {
 		// TODO Auto-generated method stub
 		
-		// 'WASD' MOVEMENT
-		if(attack){
+		if(!idle){
+			moveGrid(direction,destinationX,destinationY,d);
+		}
+		else if(attack){
 			gc.sleep(500);
 			attack = false;
 		}
-		if(idle){
+		else{
 			Input input = gc.getInput();
 			setMove(input, d);
 			getAttack(input);
-		}
-		else{
-			moveGrid(direction,destinationX,destinationY,d);
 		}
 
 
@@ -190,23 +189,23 @@ public class BasicGame extends BasicGameState {
 			// Decide direction
 			
 			if(clickX <= x && clickY >= y && clickY <= y+tileSize){
-				attackDirection = "Left";
+				attackDirection = 'L';
 				attack = true;
 			}
 			else if(clickX >= x+tileSize && clickY >= y && clickY <= y+tileSize){
-				attackDirection = "Right";
+				attackDirection = 'R';
 				attack = true;
 			}
 			else if(clickY <= y && clickX >= x && clickX <= x+tileSize){
-				attackDirection="Up";
+				attackDirection='U';
 				attack = true;
 			}
 			else if(clickY >= y+tileSize && clickX >= x && clickX <= x+tileSize){
-				attackDirection="Down";
+				attackDirection='D';
 				attack = true;
 			}
 			else{
-				attackDirection="Unaccepted";
+				attackDirection='X';
 			}
 			
 		}
@@ -217,26 +216,26 @@ public class BasicGame extends BasicGameState {
 		switch(direction){
 		case UP: 
 			if(y>=destinationY)
-				y -= 200/1000.0f*d;		
+				y -= 80/1000.0f*d;		
 			else
 				idle=true;
 			break;
 		case DOWN: 			
 			if(y<=destinationY)
-				y += 200/1000.0f*d;
+				y += 80/1000.0f*d;
 			else
 				idle=true;
 
 			break;
 		case LEFT: 
 			if(x>=destinationX)
-				x -= 200/1000.0f*d;
+				x -= 80/1000.0f*d;
 			else
 				idle=true;
 			break;
 		case RIGHT:
 			if(x<=destinationX)
-				x += 200/1000.0f*d;
+				x += 80/1000.0f*d;
 			else
 				idle=true;
 			break;
@@ -244,7 +243,7 @@ public class BasicGame extends BasicGameState {
 	}
 	
 	
-	// Initial movement
+	// Initial movement 'WASD'
 	public void setMove(Input input, int d){
 		if(input.isKeyDown(Input.KEY_W)){
 			destinationY = y-tileSize;
