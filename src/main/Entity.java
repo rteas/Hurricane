@@ -1,16 +1,19 @@
 package main;
 
 public class Entity {
-	private String name;
-	private int hp;
-	private int def;
-	private int atk;
-	private int mp;
-	private int moves;
-	private int attacks;
-	private int locationX;
-	private int locationY;
-	private int speed;
+	public String name;
+	public int hp;
+	public int def;
+	public int atk;
+	public int mp;
+	public int moves;
+	public int attacks;
+	public int locationX;
+	public int locationY;
+	public int speed;
+	public boolean idle = true;
+	public boolean attacking = false;
+	
 	// 'U' for UP, 'D' for DOWN, 'L' for LEFT, 'R' for RIGHT
 	private char direction;
 		
@@ -29,7 +32,7 @@ public class Entity {
 	}
 	
 	// Moves to x and y coordinate provided, removes a move.
-	public Room move(char d){
+	public Room move(){
 		if(moves > 0){
 			// Obtain player location (probably better in enemy entity)
 			room.getPlayerX();
@@ -49,8 +52,34 @@ public class Entity {
 		}	
 	}
 	
+	// Setters
+	public void setDirection(char direction){
+		this.direction = direction;
+	}
+	
+	public void setLocationX(int x){
+		locationX = x;
+	}
+	
+	public void setLocationY(int y){
+		locationY = y;
+	}
+	
+	public void setIdle(boolean b){
+		idle = b;
+	}
+	public void setAttacking(boolean b){
+		attacking = b;
+	}
 	
 	// Getters
+	public boolean isIdle(){
+		return idle;
+	}
+	
+	public boolean isAttacking(){
+		return attacking;
+	}
 	
 	public String getName(){
 		return name;

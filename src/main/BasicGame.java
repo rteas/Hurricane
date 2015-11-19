@@ -1,5 +1,7 @@
 package main;
 
+import java.util.LinkedList;
+
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -24,9 +26,7 @@ public class BasicGame extends BasicGameState {
 //	private Rectangle obstacle;
 	
 	
-	// Starting location (of sprite)
-	private float x = 100;
-	private float y = 100;
+	// Starting location/initialization
 	private int tileSize = 100;
 	private float destinationX;
 	private float destinationY;
@@ -35,70 +35,61 @@ public class BasicGame extends BasicGameState {
 	int speed = 200;
 	private float offsetX = 200;
 	private float offsetY = 0;
+	
+	private float x = offsetX + 100;
+	private float y = offsetY + 100;
 	int offset = 1*(speed/100);
 //	boolean collide = false;
+	
+	
 	private Room room;
 	Tile[][] tileLayer;
-	
 	EntityPlayer player;
 	
-	private SpriteSheet protagRight, pIdleRight,
-	protagLeft, pIdleLeft,
-	protagUp, pIdleUp,
-	protagDown, pIdleDown,
-	slashRight, slashLeft, slashUp, slashDown, tileSheet;
+	private RoomManager rm;
+	private LinkedList<Entity> entities;
 	
-	private Animation walkRight, walkLeft, walkDown, walkUp, rightAtk;
+	private SpriteSheet slashRight, slashLeft, slashUp, slashDown, tileSheet, rockSheet;
+	
 	
 	private boolean playerPhase = true;
-	private boolean idle = true;
+
 	private boolean attack = false;
+	
+	// Test
+	EntityObstacle eo;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
-		room = new Room(7,7,tileSize);
+		room = new Room(10,7);
+		eo = new EntityObstacle("Rock",3,3,3, room);
+		room.addEntity(eo, 3, 3);
 		tileSheet = new SpriteSheet("tileImgs/dTileSmooth.png",tileSize,tileSize);
-		//player = new EntityPlayer("Hero",100,1,1, room);
+		rockSheet = new SpriteSheet("obstacleImgs/rock.png", tileSize, tileSize);
+		player = new EntityPlayer("Hero",100,1,1, room);
 		
+		rm = new RoomManager(room, player);
+		entities = rm.getEntities();
+		
+		player = rm.getPlayer();
 		// square = new Rectangle(25,25, 200,200);
 		
-		// Protagonist Sprite and Animations
+		// Protagonist Sprite and Animations loaded in EntityPlayer
 		gc.setVSync(true);
-		protagRight = new SpriteSheet("protagImg/walkRight.png",100,100);
-		pIdleRight = new SpriteSheet("protagImg/idleRight.png",100,100);
-		walkRight = new Animation(protagRight, 150);
 
-		protagLeft = new SpriteSheet("protagImg/walkLeft.png",100,100);
-		pIdleLeft = new SpriteSheet("protagImg/idleLeft.png",100,100);
-		walkLeft = new Animation(protagLeft, 150);
-		
-		protagDown = new SpriteSheet("protagImg/walkDown.png",100,100);
-		pIdleDown = new SpriteSheet("protagImg/idleDown.png",100,100);
-		walkDown = new Animation(protagDown, 150);
-		
-		protagUp = new SpriteSheet("protagImg/walkUp.png",100,100);
-		pIdleUp = new SpriteSheet("protagImg/idleUp.png",100,100);
-		walkUp = new Animation(protagUp, 150);
-		
-		
-		slashRight = new SpriteSheet("protagImg/slashRight.png",100,100);
-		slashLeft = new SpriteSheet("protagImg/slashLeft.png",100,100);
-		slashUp = new SpriteSheet("protagImg/slashUp.png",100,100);
-		slashDown = new SpriteSheet("protagImg/slashDown.png",100,100);
-
-		//===============================================================================================
 	}
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// TODO Auto-generated method stub
 		// Grid
-		g.drawRect(x, y, tileSize, tileSize);
+		
+		// Generate/Draw tiles
 		tileLayer = room.getTileLayer();
-		for(int i=0;i<room.xTiles;i++){
-			for(int j=0;j<room.yTiles;j++){
-				tileSheet.draw(i*tileSize+offsetX, j*tileSize+offsetY);
+		for(int x=0;x<room.xMax();x++){
+			for(int y=0;y<room.yMax();y++){
+				tileSheet.draw(x*tileSize+offsetX, y*tileSize+offsetY);
 			}
 		}
 		
@@ -106,7 +97,28 @@ public class BasicGame extends BasicGameState {
 		g.drawString("Current Coordinates: \n" + "X: " + x + " Y: "+ y, 200, 0);
 		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
 		g.drawString("Attack: " + attackDirection, 400, 0);
+		g.drawString("Player at: ("+rm.getRoom().getPlayerX() + ", "+ rm.getRoom().getPlayerY() + ")",10, 30);
+		rockSheet.draw(eo.getLocationX()*tileSize+offsetX, eo.getLocationY()*tileSize+offsetY);
 		
+		// Draw enemies/items/obstacles (to be done soon)
+		for(Entity e: rm.getEntities()){
+			
+		}
+		
+		
+		
+		// Draw player
+		if(player.isIdle()){
+			player.getIdleSheet().draw(player.getLocationX()*tileSize+offsetX, player.getLocationY()*tileSize+offsetY);
+			if(player.isAttacking()){
+				player.getAttackSheet().draw(clickX, clickY);
+			}
+		}
+		else{
+			player.getMoveSheet().draw(x,y);
+		}
+		
+		/*
 		if(attack){
 			if(attackDirection == 'R'){
 				pIdleRight.draw(x,y);
@@ -129,22 +141,8 @@ public class BasicGame extends BasicGameState {
 				direction = attackDirection;
 			}
 		}
-		else if(idle){
-			switch(direction){
-			case UP: pIdleUp.draw(x,y);break;
-			case DOWN: pIdleDown.draw(x,y);break;
-			case LEFT: pIdleLeft.draw(x,y);break;
-			case RIGHT: pIdleRight.draw(x,y);break;
-			}
-		}
-		else{
-			switch(direction){
-			case UP: walkUp.draw(x,y);break;
-			case DOWN: walkDown.draw(x,y);break;
-			case LEFT: walkLeft.draw(x,y);break;
-			case RIGHT: walkRight.draw(x,y);break;
-			}
-		}
+		*/
+
 		
 		/*
 		if(attackDirection == "Right"){
@@ -170,14 +168,14 @@ public class BasicGame extends BasicGameState {
 		// TODO Auto-generated method stub
 		
 		if (playerPhase) {
-			if (!idle) {
-				moveGrid(direction, destinationX, destinationY, d);
-			} else if (attack) {
+			if (!player.isIdle()) {
+				movePlayer(direction, destinationX, destinationY, d);
+			} else if (player.isAttacking()) {
 				gc.sleep(500);
-				attack = false;
+				player.setAttacking(false);
 			} else {
 				Input input = gc.getInput();
-				setMove(input, d);
+				setMovePlayer(input);
 				getAttack(input);
 			} 
 		}
@@ -200,19 +198,26 @@ public class BasicGame extends BasicGameState {
 	
 	public void getAttack(Input input){
 		if(input.isMousePressed(input.MOUSE_LEFT_BUTTON)){
+			
 			clickX = input.getMouseX();
 			clickY = input.getMouseY();
 			// Decide direction
 			
 			if(clickX <= x && clickY >= y && clickY <= y+tileSize){
+				player.setAttacking(true);
+				player.setDirection(LEFT);
 				attackDirection = 'L';
 				attack = true;
 			}
 			else if(clickX >= x+tileSize && clickY >= y && clickY <= y+tileSize){
+				player.setAttacking(true);
+				player.setDirection(RIGHT);
 				attackDirection = 'R';
 				attack = true;
 			}
 			else if(clickY <= y && clickX >= x && clickX <= x+tileSize){
+				player.setAttacking(true);
+				player.setDirection(UP);
 				attackDirection='U';
 				attack = true;
 			}
@@ -228,14 +233,14 @@ public class BasicGame extends BasicGameState {
 	}
 	
 	// Continue moving one grid in the x/y direction
-	public void moveGrid(char direction,float destinationX, float destinationY, int d){
+	public void movePlayer(char direction,float destinationX, float destinationY, int d){
 		switch(direction){
 		case UP: 
 			if(y>=destinationY)
 				y -= speed*d/1000;		
 			else{
 				y = destinationY;
-				idle=true;
+				player.setIdle(true);
 			}
 			break;
 		case DOWN: 			
@@ -243,7 +248,7 @@ public class BasicGame extends BasicGameState {
 				y += speed*d/1000;
 			else{
 				y = destinationY;
-				idle=true;
+				player.setIdle(true);
 			}
 
 			break;
@@ -252,7 +257,7 @@ public class BasicGame extends BasicGameState {
 				x -= speed*d/1000;
 			else{
 				x = destinationX;
-				idle=true;
+				player.setIdle(true);
 			}
 			break;
 		case RIGHT:
@@ -260,7 +265,7 @@ public class BasicGame extends BasicGameState {
 				x += speed*d/1000;
 			else{
 				x = destinationX;
-				idle=true;
+				player.setIdle(true);
 			}
 			break;
 		}
@@ -268,30 +273,47 @@ public class BasicGame extends BasicGameState {
 	
 	
 	// Initial movement 'WASD'
-	public void setMove(Input input, int d){
+	public boolean setMovePlayer(Input input){
 		if(input.isKeyDown(Input.KEY_W)){
-			destinationY = y-tileSize;
-			idle = false;
-			setDirection(UP);
+			if(rm.movePlayer(UP)){
+				destinationY = y-tileSize;
+				player.setIdle(false);
+				setDirection(UP);
+				return true;
+			}
 		}
 		else if(input.isKeyDown(Input.KEY_A)){
-			destinationX = x-tileSize;
-			idle = false;
-			setDirection(LEFT);
+			if(rm.movePlayer(LEFT)){
+				destinationX = x-tileSize;
+				player.setIdle(false);
+				setDirection(LEFT);
+				return true;
+			}
 		}
 		else if(input.isKeyDown(Input.KEY_S)){
-			destinationY = y+tileSize;
-			idle = false;
-			setDirection(DOWN);
+			if (rm.movePlayer(DOWN)) {
+				destinationY = y + tileSize;
+				player.setIdle(false);
+				setDirection(DOWN);
+				return true;
+			}
 		}
 		else if(input.isKeyDown(Input.KEY_D)){
-			destinationX = x+tileSize;
-			idle = false;
-			setDirection(RIGHT);
+			if (rm.movePlayer(RIGHT)) {
+				destinationX = x + tileSize;
+				player.setIdle(false);
+				setDirection(RIGHT);
+				return true;
+			}
+		}
+		// End turn
+		else if(input.isKeyDown(Input.KEY_ENTER)){
+			playerPhase = false;
 		}
 		else{
-			idle = true;
+			player.setIdle(true);
 		}
+		return false;
 	}
 
 }

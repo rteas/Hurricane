@@ -8,24 +8,27 @@ public class Room {
 	
 	private Tile[][] tileLayer;
 	private Entity[][] entityLayer;
-	private int tileSize;
-	int xTiles;
-	int yTiles;
+	private int xTiles;
+	private int yTiles;
 
 	// Initialize with tiles, player location
-	public Room(int xTiles, int yTiles, int tileSize){
+	public Room(int xTiles, int yTiles){
 		this.xTiles = xTiles;
 		this.yTiles = yTiles;
 		
 		tileLayer = new Tile[xTiles][yTiles];
 		entityLayer = new Entity[xTiles][yTiles];
 		
-		this.tileSize = tileSize;
 		for(int i=0;i<xTiles;i++){
 			for(int j=0;j<yTiles;j++){				
 				tileLayer[i][j] = new Tile(1);
 			}
 		}
+	}
+	
+	// Add player 
+	public void addEntityPlayer(EntityPlayer entity){
+		player = entity;
 	}
 	
 	// If there is not an entity, add it
@@ -34,6 +37,7 @@ public class Room {
 			return false;
 		}
 		entityLayer[x][y] = entity;
+		
 		return true;
 	}
 	
@@ -43,16 +47,33 @@ public class Room {
 			entityLayer[x][y] = null;
 		}
 	}
+	
+	public boolean collidesWith(int x, int y){
+		if(entityAt(x,y)) return true;
+		return false;
+	}
+	
+	public Entity getCollision(int x, int y){
+		if(entityAt(x,y)) {
+			return entityLayer[x][y];
+		}
+		return null;
+	}
 
 	// Move entity to specified coordinates if 
 	// there is no collision or the entity is within the bounds of the room
 	public boolean moveEntity(Entity entity, int x, int y){
-		if(entityAt(x,y) || x > xTiles || y > yTiles) 
+		if(x > xTiles-1 || x < 0 || y > yTiles-1 || y < 0) {
 			return false;
-		
-		deleteEntity(entity.getLocationX(),entity.getLocationY());
-		addEntity(entity,x,y);
-		return true;
+		}
+		else if(collidesWith(x,y)){
+			return false;
+		}
+		else{
+			deleteEntity(entity.getLocationX(),entity.getLocationY());
+			addEntity(entity,x,y);
+			return true;
+		}
 	}
 	
 	// Checks if there is something there
@@ -61,6 +82,19 @@ public class Room {
 		else return true;
 	}
 	
+	public Entity getEntity(int x, int y){
+		if(entityAt(x,y))
+			return entityLayer[x][y];
+		return null;
+	}
+	
+	public int xMax(){
+		return xTiles;
+	}
+	
+	public int yMax(){
+		return yTiles;
+	}
 	
 	public Tile[][] getTileLayer(){
 		return tileLayer;
@@ -77,12 +111,17 @@ public class Room {
 	//=============PLAYER SPECIFIC=========
 
 	// Returns players location (x and y coordinates)
+	
 	public int getPlayerX(){
-		return player.getLocationX();
+		if(player != null)
+			return player.getLocationX();
+		else return -1;
 	}
 	
 	public int getPlayerY(){
-		return player.getLocationY();
+		if(player != null)
+			return player.getLocationY();
+		else return -1;
 	}
 	
 	
