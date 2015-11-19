@@ -32,24 +32,34 @@ public class BasicGame extends BasicGameState {
 	private float destinationY;
 	private float clickX = 0;
 	private float clickY = 0;
-	
-	
+	int speed = 200;
+	private float offsetX = 200;
+	private float offsetY = 0;
+	int offset = 1*(speed/100);
 //	boolean collide = false;
+	private Room room;
+	Tile[][] tileLayer;
+	
+	EntityPlayer player;
 	
 	private SpriteSheet protagRight, pIdleRight,
 	protagLeft, pIdleLeft,
 	protagUp, pIdleUp,
 	protagDown, pIdleDown,
-	slashRight, slashLeft, slashUp, slashDown;
+	slashRight, slashLeft, slashUp, slashDown, tileSheet;
 	
 	private Animation walkRight, walkLeft, walkDown, walkUp, rightAtk;
 	
+	private boolean playerPhase = true;
 	private boolean idle = true;
 	private boolean attack = false;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
+		room = new Room(7,7,tileSize);
+		tileSheet = new SpriteSheet("tileImgs/dTileSmooth.png",tileSize,tileSize);
+		//player = new EntityPlayer("Hero",100,1,1, room);
 		
 		// square = new Rectangle(25,25, 200,200);
 		
@@ -83,13 +93,19 @@ public class BasicGame extends BasicGameState {
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// TODO Auto-generated method stub
+		// Grid
+		g.drawRect(x, y, tileSize, tileSize);
+		tileLayer = room.getTileLayer();
+		for(int i=0;i<room.xTiles;i++){
+			for(int j=0;j<room.yTiles;j++){
+				tileSheet.draw(i*tileSize+offsetX, j*tileSize+offsetY);
+			}
+		}
 		
 		// Status/Debug
 		g.drawString("Current Coordinates: \n" + "X: " + x + " Y: "+ y, 200, 0);
 		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
 		g.drawString("Attack: " + attackDirection, 400, 0);
-		// Grid
-		g.drawRect(x, y, tileSize, tileSize);
 		
 		if(attack){
 			if(attackDirection == 'R'){
@@ -153,17 +169,17 @@ public class BasicGame extends BasicGameState {
 	public void update(GameContainer gc, StateBasedGame sbg, int d) throws SlickException {
 		// TODO Auto-generated method stub
 		
-		if(!idle){
-			moveGrid(direction,destinationX,destinationY,d);
-		}
-		else if(attack){
-			gc.sleep(500);
-			attack = false;
-		}
-		else{
-			Input input = gc.getInput();
-			setMove(input, d);
-			getAttack(input);
+		if (playerPhase) {
+			if (!idle) {
+				moveGrid(direction, destinationX, destinationY, d);
+			} else if (attack) {
+				gc.sleep(500);
+				attack = false;
+			} else {
+				Input input = gc.getInput();
+				setMove(input, d);
+				getAttack(input);
+			} 
 		}
 
 
@@ -216,28 +232,36 @@ public class BasicGame extends BasicGameState {
 		switch(direction){
 		case UP: 
 			if(y>=destinationY)
-				y -= 80/1000.0f*d;		
-			else
+				y -= speed*d/1000;		
+			else{
+				y = destinationY;
 				idle=true;
+			}
 			break;
 		case DOWN: 			
 			if(y<=destinationY)
-				y += 80/1000.0f*d;
-			else
+				y += speed*d/1000;
+			else{
+				y = destinationY;
 				idle=true;
+			}
 
 			break;
 		case LEFT: 
 			if(x>=destinationX)
-				x -= 80/1000.0f*d;
-			else
+				x -= speed*d/1000;
+			else{
+				x = destinationX;
 				idle=true;
+			}
 			break;
 		case RIGHT:
 			if(x<=destinationX)
-				x += 80/1000.0f*d;
-			else
+				x += speed*d/1000;
+			else{
+				x = destinationX;
 				idle=true;
+			}
 			break;
 		}
 	}
