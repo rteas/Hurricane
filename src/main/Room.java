@@ -5,6 +5,7 @@ import java.util.LinkedList;
 public class Room {
 	
 	private EntityPlayer player;
+	private LinkedList<Entity> otherEntities = new LinkedList<Entity>();
 	
 	private Tile[][] tileLayer;
 	private Entity[][] entityLayer;
@@ -37,6 +38,7 @@ public class Room {
 			return false;
 		}
 		entityLayer[x][y] = entity;
+		otherEntities.add(entity);
 		
 		return true;
 	}
@@ -78,6 +80,7 @@ public class Room {
 	
 	// Checks if there is something there
 	public boolean entityAt(int x, int y){
+		if(x > xTiles-1 || x < 0 || y > yTiles-1 || y < 0) return false;
 		if(entityLayer[x][y] == null) return false;
 		else return true;
 	}
@@ -106,6 +109,10 @@ public class Room {
 	
 	public int getTile(int x, int y){
 		return tileLayer[x][y].getTile();
+	}
+	
+	public LinkedList<Entity> getEntities(){
+		return otherEntities;
 	}
 	
 	//=============PLAYER SPECIFIC=========

@@ -20,11 +20,9 @@ public class BasicGame extends BasicGameState {
 	// used to deterimine direction
 	public static final char UP = 'U', DOWN = 'D', LEFT='L', RIGHT='R';
 	
-	private char direction = 'R';
 	private char attackDirection = 'N';
 //	private Rectangle square;
 //	private Rectangle obstacle;
-	
 	
 	// Starting location/initialization
 	private int tileSize = 100;
@@ -33,8 +31,8 @@ public class BasicGame extends BasicGameState {
 	private float clickX = 0;
 	private float clickY = 0;
 	int speed = 200;
-	private float offsetX = 200;
-	private float offsetY = 0;
+	private int offsetX = 2*tileSize;
+	private int offsetY = 50;
 	
 	private float x = offsetX + 100;
 	private float y = offsetY + 100;
@@ -49,15 +47,26 @@ public class BasicGame extends BasicGameState {
 	private RoomManager rm;
 	private LinkedList<Entity> entities;
 	
-	private SpriteSheet slashRight, slashLeft, slashUp, slashDown, tileSheet, rockSheet;
+	private SpriteSheet tileSheet, rockSheet, enemySheet, mageSheet;
+
 	
 	
 	private boolean playerPhase = true;
+	private boolean canAttack = false;
 
-	private boolean attack = false;
 	
 	// Test
 	EntityObstacle eo;
+	EntityEnemy enemy;
+	public String entityHit = "Nothing";
+	
+	// Transforms array -> pixel coordinates for drawing
+	public int getX(int x){
+		return x*tileSize+offsetX;
+	}
+	public int getY(int y){
+		return y*tileSize+offsetY;
+	}
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
@@ -65,10 +74,18 @@ public class BasicGame extends BasicGameState {
 		room = new Room(10,7);
 		eo = new EntityObstacle("Rock",3,3,3, room);
 		room.addEntity(eo, 3, 3);
-		tileSheet = new SpriteSheet("tileImgs/dTileSmooth.png",tileSize,tileSize);
-		rockSheet = new SpriteSheet("obstacleImgs/rock.png", tileSize, tileSize);
-		player = new EntityPlayer("Hero",100,1,1, room);
+		enemy = new EntityEnemy("Charger",100,3,5,room);
+		room.addEntity(enemy, 3, 5);
 		
+		tileSheet = new SpriteSheet("tileImgs/dTile.png",tileSize,tileSize);
+		rockSheet = new SpriteSheet("obstacleImgs/brokenRocks.png", tileSize, tileSize);
+		enemySheet = new SpriteSheet("enemies/chargerX.png", tileSize, tileSize);
+		mageSheet = new SpriteSheet("enemies/mageIdle.png",tileSize,tileSize);
+
+		
+		
+		
+		player = new EntityPlayer("Hero",100,1,1, room);
 		rm = new RoomManager(room, player);
 		entities = rm.getEntities();
 		
@@ -84,12 +101,11 @@ public class BasicGame extends BasicGameState {
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// TODO Auto-generated method stub
 		// Grid
-		
 		// Generate/Draw tiles
 		tileLayer = room.getTileLayer();
 		for(int x=0;x<room.xMax();x++){
 			for(int y=0;y<room.yMax();y++){
-				tileSheet.draw(x*tileSize+offsetX, y*tileSize+offsetY);
+				tileSheet.draw(getX(x), getY(y));
 			}
 		}
 		
@@ -97,8 +113,11 @@ public class BasicGame extends BasicGameState {
 		g.drawString("Current Coordinates: \n" + "X: " + x + " Y: "+ y, 200, 0);
 		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
 		g.drawString("Attack: " + attackDirection, 400, 0);
-		g.drawString("Player at: ("+rm.getRoom().getPlayerX() + ", "+ rm.getRoom().getPlayerY() + ")",10, 30);
-		rockSheet.draw(eo.getLocationX()*tileSize+offsetX, eo.getLocationY()*tileSize+offsetY);
+		g.drawString("Player at: ("+ rm.getPlayer().getLocationX() + ", "+ player.getLocationY() + ")",10, 30);
+		g.drawString("Hit: "+ entityHit + "!", 10, 50);
+		
+		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
+		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
 		
 		// Draw enemies/items/obstacles (to be done soon)
 		for(Entity e: rm.getEntities()){
@@ -107,50 +126,32 @@ public class BasicGame extends BasicGameState {
 		
 		
 		
-		// Draw player
-		if(player.isIdle()){
-			player.getIdleSheet().draw(player.getLocationX()*tileSize+offsetX, player.getLocationY()*tileSize+offsetY);
-			if(player.isAttacking()){
-				player.getAttackSheet().draw(clickX, clickY);
+		// Draw player depending on current status
+		if(player.isAttacking()){
+			char pd = player.getDirection();
+			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
+			SpriteSheet atk = player.getAttackSheet();
+			switch(pd){
+				case UP:
+					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())-100);
+					break;
+				case DOWN:
+					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())+100);
+					break;
+				case LEFT:
+					atk.draw(getX(player.getLocationX())-100, getY(player.getLocationY()));
+					break;
+				case RIGHT:
+					atk.draw(getX(player.getLocationX())+100, getY(player.getLocationY()));
+					break;
 			}
+		}
+		else if(player.isIdle()){
+			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
 		}
 		else{
 			player.getMoveSheet().draw(x,y);
 		}
-		
-		/*
-		if(attack){
-			if(attackDirection == 'R'){
-				pIdleRight.draw(x,y);
-				slashRight.draw(x+tileSize, y);
-				direction = attackDirection;
-			}
-			else if(attackDirection == 'L'){
-				pIdleLeft.draw(x,y);
-				slashLeft.draw(x-tileSize,y);
-				direction = attackDirection;
-			}
-			else if(attackDirection == 'U'){
-				pIdleUp.draw(x,y);
-				slashUp.draw(x,y-tileSize);
-				direction = attackDirection;
-			}
-			else{
-				pIdleDown.draw(x,y);
-				slashDown.draw(x,y+tileSize);
-				direction = attackDirection;
-			}
-		}
-		*/
-
-		
-		/*
-		if(attackDirection == "Right"){
-			rightAtk.draw(x+100, y);
-			attackDirection = "null";
-		}
-		*/
-
 		
 		// Some tutorial stuff
 		/*
@@ -166,19 +167,22 @@ public class BasicGame extends BasicGameState {
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int d) throws SlickException {
 		// TODO Auto-generated method stub
-		
 		if (playerPhase) {
 			if (!player.isIdle()) {
-				movePlayer(direction, destinationX, destinationY, d);
-			} else if (player.isAttacking()) {
+				movePlayer(player.getDirection(), destinationX, destinationY, d);
+			} 
+			else if (player.isAttacking()) {
 				gc.sleep(500);
 				player.setAttacking(false);
-			} else {
+			} 
+			else {
 				Input input = gc.getInput();
 				setMovePlayer(input);
 				getAttack(input);
 			} 
 		}
+		// else enemy phase/turn
+		
 
 
 	}
@@ -191,12 +195,9 @@ public class BasicGame extends BasicGameState {
 	
 	// Helper methods
 	
-	// Sets the direction of the character 
-	public void setDirection(char direction){
-		this.direction = direction;
-	}
-	
 	public void getAttack(Input input){
+		
+		// Melee attack
 		if(input.isMousePressed(input.MOUSE_LEFT_BUTTON)){
 			
 			clickX = input.getMouseX();
@@ -206,28 +207,38 @@ public class BasicGame extends BasicGameState {
 			if(clickX <= x && clickY >= y && clickY <= y+tileSize){
 				player.setAttacking(true);
 				player.setDirection(LEFT);
+				Entity e = player.atkMelee(LEFT);
+				entityHit = rm.playerAtk(e);
 				attackDirection = 'L';
-				attack = true;
 			}
 			else if(clickX >= x+tileSize && clickY >= y && clickY <= y+tileSize){
 				player.setAttacking(true);
 				player.setDirection(RIGHT);
+				Entity e = player.atkMelee(RIGHT);
+				entityHit = rm.playerAtk(e);
 				attackDirection = 'R';
-				attack = true;
 			}
 			else if(clickY <= y && clickX >= x && clickX <= x+tileSize){
 				player.setAttacking(true);
 				player.setDirection(UP);
+				Entity e = player.atkMelee(UP);
+				entityHit = rm.playerAtk(e);
 				attackDirection='U';
-				attack = true;
 			}
 			else if(clickY >= y+tileSize && clickX >= x && clickX <= x+tileSize){
+				player.setAttacking(true);
+				player.setDirection(DOWN);
+				Entity e = player.atkMelee(DOWN);
+				entityHit = rm.playerAtk(e);
 				attackDirection='D';
-				attack = true;
 			}
 			else{
 				attackDirection='X';
 			}
+			
+		}
+		// Ranged attack
+		else if(input.isMousePressed(input.MOUSE_RIGHT_BUTTON)){
 			
 		}
 	}
@@ -274,35 +285,35 @@ public class BasicGame extends BasicGameState {
 	
 	// Initial movement 'WASD'
 	public boolean setMovePlayer(Input input){
-		if(input.isKeyDown(Input.KEY_W)){
+		if(input.isKeyPressed(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){
 			if(rm.movePlayer(UP)){
 				destinationY = y-tileSize;
 				player.setIdle(false);
-				setDirection(UP);
+				player.setDirection(UP);
 				return true;
 			}
 		}
-		else if(input.isKeyDown(Input.KEY_A)){
+		else if(input.isKeyPressed(Input.KEY_A) || input.isKeyPressed(Input.KEY_LEFT)){
 			if(rm.movePlayer(LEFT)){
 				destinationX = x-tileSize;
 				player.setIdle(false);
-				setDirection(LEFT);
+				player.setDirection(LEFT);
 				return true;
 			}
 		}
-		else if(input.isKeyDown(Input.KEY_S)){
+		else if(input.isKeyPressed(Input.KEY_S) || input.isKeyPressed(Input.KEY_DOWN)){
 			if (rm.movePlayer(DOWN)) {
 				destinationY = y + tileSize;
 				player.setIdle(false);
-				setDirection(DOWN);
+				player.setDirection(DOWN);
 				return true;
 			}
 		}
-		else if(input.isKeyDown(Input.KEY_D)){
+		else if(input.isKeyDown(Input.KEY_D) || input.isKeyPressed(Input.KEY_RIGHT)){
 			if (rm.movePlayer(RIGHT)) {
 				destinationX = x + tileSize;
 				player.setIdle(false);
-				setDirection(RIGHT);
+				player.setDirection(RIGHT);
 				return true;
 			}
 		}

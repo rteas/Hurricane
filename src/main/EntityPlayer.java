@@ -6,12 +6,12 @@ import org.newdawn.slick.SpriteSheet;
 
 public class EntityPlayer extends Entity{
 	
+	
+	
 	private SpriteSheet protagRight, idleRight, protagLeft, idleLeft,
 						protagUp, idleUp, protagDown, idleDown,
 						slashRight, slashLeft, slashUp, slashDown;
 	private Animation walkRight, walkLeft, walkDown, walkUp;
-	
-	private char direction = 'R';
 
 	{
 		try{
@@ -72,6 +72,53 @@ public class EntityPlayer extends Entity{
 			case 'D': return slashDown;
 			case 'L': return slashLeft;
 			default: return slashRight;
+		}
+	}
+	
+	// x and y are the coordinates of the locationn of this entity
+	// also obtain through this.getLocationX() / this.getLocationY()
+	public Entity atkMelee(char direction){
+		if (meleePossible(direction)) {
+			switch (direction) {
+			case 'U':
+				if (room.entityAt(locationX, locationY - 1)) {
+					Entity e = room.getEntity(locationX, locationY - 1);
+					return e;
+				}
+				return null;
+			case 'D':
+				if (room.entityAt(locationX, locationY + 1)) {
+					Entity e = room.getEntity(locationX, locationY + 1);
+					return e;
+				}
+				return null;
+			case 'L':
+				if (room.entityAt(locationX - 1, locationY)) {
+					Entity e = room.getEntity(locationX - 1, locationY);
+					return e;
+				}
+				return null;
+			default:
+				if (room.entityAt(locationX + 1, locationY)) {
+					Entity e = room.getEntity(locationX + 1, locationY);
+					return e;
+				}
+				return null;
+			}
+		}
+		else return null;
+	}
+	
+	public boolean meleePossible(char direction){
+		switch(direction){
+		case 'U': 
+			return room.entityAt(locationX, locationY-1);
+		case 'D': 
+			return room.entityAt(locationX, locationY+1);
+		case 'L': 
+			return room.entityAt(locationX-1, locationY);
+		default: 
+			return room.entityAt(locationX+1, locationY);
 		}
 	}
 	

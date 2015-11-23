@@ -8,6 +8,7 @@ public class Entity {
 	public int mp;
 	public int moves;
 	public int attacks;
+	// Formerly locationX, locationY
 	public int locationX;
 	public int locationY;
 	public int speed;
@@ -15,7 +16,7 @@ public class Entity {
 	public boolean attacking = false;
 	
 	// 'U' for UP, 'D' for DOWN, 'L' for LEFT, 'R' for RIGHT
-	private char direction;
+	public char direction = 'R';
 		
 	public Room room;
 	
@@ -26,6 +27,8 @@ public class Entity {
 		this.locationX = locationX;
 		this.locationY = locationY;
 		this.room = room;
+		atk = 100;
+		def = 50;
 		moves = 1;
 		attacks = 1;
 		speed = 200;
@@ -52,17 +55,25 @@ public class Entity {
 		}	
 	}
 	
+	public void onHit(int atk){
+		hp = hp - (atk-def);
+	}
+	
+	public boolean defeated(){
+		return hp <= 0;
+	}
+	
 	// Setters
 	public void setDirection(char direction){
 		this.direction = direction;
 	}
 	
 	public void setLocationX(int x){
-		locationX = x;
+		this.locationX = x;
 	}
 	
 	public void setLocationY(int y){
-		locationY = y;
+		this.locationY = y;
 	}
 	
 	public void setIdle(boolean b){
@@ -73,6 +84,10 @@ public class Entity {
 	}
 	
 	// Getters
+	public char getDirection(){
+		return direction;
+	}
+	
 	public boolean isIdle(){
 		return idle;
 	}
