@@ -25,34 +25,40 @@ public class BasicGame extends BasicGameState {
 //	private Rectangle obstacle;
 	
 	// Starting location/initialization
+	// offsets for pixels (Screen Resolution in main)
 	private int tileSize = 100;
 	private float destinationX;
 	private float destinationY;
 	private float clickX = 0;
 	private float clickY = 0;
 	int speed = 200;
-	private int offsetX = 2*tileSize;
-	private int offsetY = 50;
+	private int offsetX = tileSize+68;
+	private int offsetY = 68;
 	
-	private float x = offsetX + 100;
-	private float y = offsetY + 100;
+	// Drawing locations
+	private float playerX = offsetX + 100;
+	private float playerY = offsetY + 100;
 	int offset = 1*(speed/100);
 //	boolean collide = false;
 	
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	// Player & Enemies (entities) are reliant on room, and vice versa
+	// Room manager handles the link between them
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	
 	private Room room;
 	Tile[][] tileLayer;
 	EntityPlayer player;
 	
 	private RoomManager rm;
-	private LinkedList<Entity> entities;
+	//private LinkedList<Entity> entities;
 	
 	private SpriteSheet tileSheet, rockSheet, enemySheet, mageSheet;
 
 	
 	
 	private boolean playerPhase = true;
-	private boolean canAttack = false;
+//	private boolean canAttack = false;
 
 	
 	// Test
@@ -71,10 +77,12 @@ public class BasicGame extends BasicGameState {
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
-		room = new Room(10,7);
-		eo = new EntityObstacle("Rock",3,3,3, room);
+		
+		// Debug, spawning, and stuff goes here...
+		room = new Room(12,7);
+		eo = new EntityObstacle("Rock",3,3,3);
 		room.addEntity(eo, 3, 3);
-		enemy = new EntityEnemy("Charger",100,3,5,room);
+		enemy = new EntityCharger("Charger",100,3,5);
 		room.addEntity(enemy, 3, 5);
 		
 		tileSheet = new SpriteSheet("tileImgs/dTile.png",tileSize,tileSize);
@@ -85,9 +93,10 @@ public class BasicGame extends BasicGameState {
 		
 		
 		
-		player = new EntityPlayer("Hero",100,1,1, room);
-		rm = new RoomManager(room, player);
-		entities = rm.getEntities();
+		player = new EntityPlayer("Hero",100,1,1);
+		room.addEntityPlayer(player);
+		rm = new RoomManager(room);
+//		entities = rm.getEntities();
 		
 		player = rm.getPlayer();
 		// square = new Rectangle(25,25, 200,200);
@@ -110,22 +119,23 @@ public class BasicGame extends BasicGameState {
 		}
 		
 		// Status/Debug
-		g.drawString("Current Coordinates: \n" + "X: " + x + " Y: "+ y, 200, 0);
+		g.drawString("Current Coordinates: \n" + "X: " + playerX + " Y: "+ playerY, 200, 0);
 		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
 		g.drawString("Attack: " + attackDirection, 400, 0);
 		g.drawString("Player at: ("+ rm.getPlayer().getLocationX() + ", "+ player.getLocationY() + ")",10, 30);
 		g.drawString("Hit: "+ entityHit + "!", 10, 50);
 		
-		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
-		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
+//		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
+//		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
 		
 		// Draw enemies/items/obstacles (to be done soon)
 		for(Entity e: rm.getEntities()){
+			if(!(e instanceof EntityPlayer))
+			e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
 			
 		}
 		
-		
-		
+
 		// Draw player depending on current status
 		if(player.isAttacking()){
 			char pd = player.getDirection();
@@ -133,16 +143,16 @@ public class BasicGame extends BasicGameState {
 			SpriteSheet atk = player.getAttackSheet();
 			switch(pd){
 				case UP:
-					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())-100);
+					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())-tileSize);
 					break;
 				case DOWN:
-					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())+100);
+					atk.draw(getX(player.getLocationX()), getY(player.getLocationY())+tileSize);
 					break;
 				case LEFT:
-					atk.draw(getX(player.getLocationX())-100, getY(player.getLocationY()));
+					atk.draw(getX(player.getLocationX())-tileSize, getY(player.getLocationY()));
 					break;
 				case RIGHT:
-					atk.draw(getX(player.getLocationX())+100, getY(player.getLocationY()));
+					atk.draw(getX(player.getLocationX())+tileSize, getY(player.getLocationY()));
 					break;
 			}
 		}
@@ -150,7 +160,7 @@ public class BasicGame extends BasicGameState {
 			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
 		}
 		else{
-			player.getMoveSheet().draw(x,y);
+			player.getMoveSheet().draw(playerX,playerY);
 		}
 		
 		// Some tutorial stuff
@@ -167,12 +177,14 @@ public class BasicGame extends BasicGameState {
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int d) throws SlickException {
 		// TODO Auto-generated method stub
+		
+		// PRESS ENTER TO SKIP TO ENEMY PHASE
 		if (playerPhase) {
 			if (!player.isIdle()) {
 				movePlayer(player.getDirection(), destinationX, destinationY, d);
 			} 
 			else if (player.isAttacking()) {
-				gc.sleep(500);
+				gc.sleep(250);
 				player.setAttacking(false);
 			} 
 			else {
@@ -181,7 +193,11 @@ public class BasicGame extends BasicGameState {
 				getAttack(input);
 			} 
 		}
+		
 		// else enemy phase/turn
+		else{
+			rm.moveEnemies();
+		}
 		
 
 
@@ -204,34 +220,34 @@ public class BasicGame extends BasicGameState {
 			clickY = input.getMouseY();
 			// Decide direction
 			
-			if(clickX <= x && clickY >= y && clickY <= y+tileSize){
-				player.setAttacking(true);
-				player.setDirection(LEFT);
-				Entity e = player.atkMelee(LEFT);
-				entityHit = rm.playerAtk(e);
+			// LEFT
+			if(clickX <= playerX && clickY >= playerY && clickY <= playerY+tileSize){
+				player.atkMelee(room, LEFT);
 				attackDirection = 'L';
 			}
-			else if(clickX >= x+tileSize && clickY >= y && clickY <= y+tileSize){
-				player.setAttacking(true);
-				player.setDirection(RIGHT);
-				Entity e = player.atkMelee(RIGHT);
-				entityHit = rm.playerAtk(e);
+			// RIGHT
+			else if(clickX >= playerX+tileSize && clickY >= playerY && clickY <= playerY+tileSize){
+				player.atkMelee(room, RIGHT);
 				attackDirection = 'R';
+
 			}
-			else if(clickY <= y && clickX >= x && clickX <= x+tileSize){
+			// UP
+			else if(clickY <= playerY && clickX >= playerX && clickX <= playerX+tileSize){
 				player.setAttacking(true);
 				player.setDirection(UP);
-				Entity e = player.atkMelee(UP);
-				entityHit = rm.playerAtk(e);
+//				Entity e = player.atkMelee(rm.getRoom(),UP);
+//				entityHit = rm.playerAtk(e);
 				attackDirection='U';
 			}
-			else if(clickY >= y+tileSize && clickX >= x && clickX <= x+tileSize){
+			// DOWN
+			else if(clickY >= playerY+tileSize && clickX >= playerX && clickX <= playerX+tileSize){
 				player.setAttacking(true);
 				player.setDirection(DOWN);
-				Entity e = player.atkMelee(DOWN);
-				entityHit = rm.playerAtk(e);
+//				Entity e = player.atkMelee(rm.getRoom(),DOWN);
+//				entityHit = rm.playerAtk(e);
 				attackDirection='D';
 			}
+			// UNAVAILABLE
 			else{
 				attackDirection='X';
 			}
@@ -243,39 +259,39 @@ public class BasicGame extends BasicGameState {
 		}
 	}
 	
-	// Continue moving one grid in the x/y direction
+	// [Drawing] Continue moving one grid in the x/y direction
 	public void movePlayer(char direction,float destinationX, float destinationY, int d){
 		switch(direction){
 		case UP: 
-			if(y>=destinationY)
-				y -= speed*d/1000;		
+			if(playerY>=destinationY)
+				playerY -= speed*d/1000;		
 			else{
-				y = destinationY;
+				playerY = destinationY;
 				player.setIdle(true);
 			}
 			break;
 		case DOWN: 			
-			if(y<=destinationY)
-				y += speed*d/1000;
+			if(playerY<=destinationY)
+				playerY += speed*d/1000;
 			else{
-				y = destinationY;
+				playerY = destinationY;
 				player.setIdle(true);
 			}
 
 			break;
 		case LEFT: 
-			if(x>=destinationX)
-				x -= speed*d/1000;
+			if(playerX>=destinationX)
+				playerX -= speed*d/1000;
 			else{
-				x = destinationX;
+				playerX = destinationX;
 				player.setIdle(true);
 			}
 			break;
 		case RIGHT:
-			if(x<=destinationX)
-				x += speed*d/1000;
+			if(playerX<=destinationX)
+				playerX += speed*d/1000;
 			else{
-				x = destinationX;
+				playerX = destinationX;
 				player.setIdle(true);
 			}
 			break;
@@ -287,7 +303,7 @@ public class BasicGame extends BasicGameState {
 	public boolean setMovePlayer(Input input){
 		if(input.isKeyPressed(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){
 			if(rm.movePlayer(UP)){
-				destinationY = y-tileSize;
+				destinationY = playerY-tileSize;
 				player.setIdle(false);
 				player.setDirection(UP);
 				return true;
@@ -295,7 +311,7 @@ public class BasicGame extends BasicGameState {
 		}
 		else if(input.isKeyPressed(Input.KEY_A) || input.isKeyPressed(Input.KEY_LEFT)){
 			if(rm.movePlayer(LEFT)){
-				destinationX = x-tileSize;
+				destinationX = playerX-tileSize;
 				player.setIdle(false);
 				player.setDirection(LEFT);
 				return true;
@@ -303,7 +319,7 @@ public class BasicGame extends BasicGameState {
 		}
 		else if(input.isKeyPressed(Input.KEY_S) || input.isKeyPressed(Input.KEY_DOWN)){
 			if (rm.movePlayer(DOWN)) {
-				destinationY = y + tileSize;
+				destinationY = playerY + tileSize;
 				player.setIdle(false);
 				player.setDirection(DOWN);
 				return true;
@@ -311,7 +327,7 @@ public class BasicGame extends BasicGameState {
 		}
 		else if(input.isKeyDown(Input.KEY_D) || input.isKeyPressed(Input.KEY_RIGHT)){
 			if (rm.movePlayer(RIGHT)) {
-				destinationX = x + tileSize;
+				destinationX = playerX + tileSize;
 				player.setIdle(false);
 				player.setDirection(RIGHT);
 				return true;

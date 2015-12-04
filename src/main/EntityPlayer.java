@@ -6,8 +6,6 @@ import org.newdawn.slick.SpriteSheet;
 
 public class EntityPlayer extends Entity{
 	
-	
-	
 	private SpriteSheet protagRight, idleRight, protagLeft, idleLeft,
 						protagUp, idleUp, protagDown, idleDown,
 						slashRight, slashLeft, slashUp, slashDown;
@@ -43,11 +41,11 @@ public class EntityPlayer extends Entity{
 	}
 	
 	
-	public EntityPlayer(String name, int hp, int locationX, int locationY, Room room) {
-		super(name, hp, locationX, locationY, room);
+	public EntityPlayer(String name, int hp, int locationX, int locationY) {
+		super(name, hp, locationX, locationY);
 	}
 	
-	
+	// Returns spritesheet based on direction the character is facing (see parent class for directions)
 	public SpriteSheet getIdleSheet(){
 		switch(direction){
 			case 'U': return idleUp;
@@ -75,32 +73,38 @@ public class EntityPlayer extends Entity{
 		}
 	}
 	
-	// x and y are the coordinates of the locationn of this entity
+	// x and y are the coordinates of the location of this entity
 	// also obtain through this.getLocationX() / this.getLocationY()
-	public Entity atkMelee(char direction){
-		if (meleePossible(direction)) {
+	public Entity atkMelee(Room room, char direction){
+		this.setDirection(direction);
+		this.setAttacking(true);
+		if (meleeHit(room, direction)) {
 			switch (direction) {
 			case 'U':
 				if (room.entityAt(locationX, locationY - 1)) {
 					Entity e = room.getEntity(locationX, locationY - 1);
+					e.onHit(room, atk);
 					return e;
 				}
 				return null;
 			case 'D':
 				if (room.entityAt(locationX, locationY + 1)) {
 					Entity e = room.getEntity(locationX, locationY + 1);
+					e.onHit(room, atk);
 					return e;
 				}
 				return null;
 			case 'L':
 				if (room.entityAt(locationX - 1, locationY)) {
 					Entity e = room.getEntity(locationX - 1, locationY);
+					e.onHit(room, atk);
 					return e;
 				}
 				return null;
 			default:
 				if (room.entityAt(locationX + 1, locationY)) {
 					Entity e = room.getEntity(locationX + 1, locationY);
+					e.onHit(room, atk);
 					return e;
 				}
 				return null;
@@ -109,7 +113,7 @@ public class EntityPlayer extends Entity{
 		else return null;
 	}
 	
-	public boolean meleePossible(char direction){
+	public boolean meleeHit(Room room, char direction){
 		switch(direction){
 		case 'U': 
 			return room.entityAt(locationX, locationY-1);
@@ -122,7 +126,7 @@ public class EntityPlayer extends Entity{
 		}
 	}
 	
-	public boolean move(char direction){
+	public boolean move(Room room, char direction){
 		this.direction = direction;
 		
 		switch(direction){

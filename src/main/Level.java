@@ -8,6 +8,7 @@ public class Level {
 	LinkedList<Room> rooms;
 	
 	public Level(Room room){
+		rooms = new LinkedList<Room>();
 		rooms.add(room);
 	}
 	

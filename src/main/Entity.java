@@ -1,6 +1,21 @@
 package main;
 
+import org.newdawn.slick.Animation;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.SpriteSheet;
+
 public class Entity {
+	
+	private SpriteSheet idleSheet;
+	{
+		try{
+			idleSheet = new SpriteSheet("tileImgs/dTile.png",100,100);
+		}
+		catch(SlickException e){
+			System.out.println(e);
+		}
+	}
+	
 	public String name;
 	public int hp;
 	public int def;
@@ -18,15 +33,15 @@ public class Entity {
 	// 'U' for UP, 'D' for DOWN, 'L' for LEFT, 'R' for RIGHT
 	public char direction = 'R';
 		
-	public Room room;
+//	public Room room;
 	
 	// Room will be used as a 'map'
-	public Entity(String name, int hp, int locationX, int locationY, Room room){
+	public Entity(String name, int hp, int locationX, int locationY){
 		this.name = name;
 		this.hp = hp;
 		this.locationX = locationX;
 		this.locationY = locationY;
-		this.room = room;
+
 		atk = 100;
 		def = 50;
 		moves = 1;
@@ -35,7 +50,7 @@ public class Entity {
 	}
 	
 	// Moves to x and y coordinate provided, removes a move.
-	public Room move(){
+	public void move(Room room){
 		if(moves > 0){
 			// Obtain player location (probably better in enemy entity)
 			room.getPlayerX();
@@ -43,10 +58,14 @@ public class Entity {
 			moves--;
 			
 			// Update map
-			room.moveEntity(this,locationX, locationY);
-			updateRoom(room);
+//			room.moveEntity(this,locationX, locationY);
+//			updateRoom(room);
 		}
-		return room;
+//		return room;
+	}
+	
+	public boolean canMove(Room room, int x, int y){
+		return true;
 	}
 	
 	public void attack(){
@@ -55,8 +74,19 @@ public class Entity {
 		}	
 	}
 	
-	public void onHit(int atk){
+	public void updateEntity(Room room){
+		if(this.defeated()){
+			room.deleteEntity(locationX, locationY);
+		}
+	}
+	
+	
+	// Default method called when hit
+	public void onHit(Room room,int atk){
 		hp = hp - (atk-def);
+		if(hp <= 0){
+			updateEntity(room);
+		}
 	}
 	
 	public boolean defeated(){
@@ -84,6 +114,10 @@ public class Entity {
 	}
 	
 	// Getters
+	
+	public SpriteSheet getIdleSheet(){
+		return idleSheet;
+	}
 	public char getDirection(){
 		return direction;
 	}
@@ -123,7 +157,7 @@ public class Entity {
 	public int getLocationY(){
 		return locationY;
 	}
-	
+	/*
 	public void updateRoom(Room room){
 		this.room = room;
 	}
@@ -131,5 +165,6 @@ public class Entity {
 	public Room getRoom(){
 		return room;
 	}
+	*/
 	
 }

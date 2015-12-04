@@ -5,7 +5,15 @@ import java.util.LinkedList;
 public class Room {
 	
 	private EntityPlayer player;
-	private LinkedList<Entity> otherEntities = new LinkedList<Entity>();
+	
+	// Stores enemy entities, obstacles, and items
+	/*
+	private LinkedList<EntityEnemy> enemies = new LinkedList<EntityEnemy>();
+	private LinkedList<EntityObstacle> obstacles = new LinkedList<EntityObstacle>();
+	private LinkedList<EntityItem> items = new LinkedList<EntityItem>();
+	*/
+	
+	private LinkedList<Entity> entities = new LinkedList<Entity>();
 	
 	private Tile[][] tileLayer;
 	private Entity[][] entityLayer;
@@ -13,6 +21,8 @@ public class Room {
 	private int yTiles;
 
 	// Initialize with tiles, player location
+	// Can initialize with entities here as well
+	// Use add entity calls (see below)
 	public Room(int xTiles, int yTiles){
 		this.xTiles = xTiles;
 		this.yTiles = yTiles;
@@ -20,33 +30,83 @@ public class Room {
 		tileLayer = new Tile[xTiles][yTiles];
 		entityLayer = new Entity[xTiles][yTiles];
 		
-		for(int i=0;i<xTiles;i++){
-			for(int j=0;j<yTiles;j++){				
-				tileLayer[i][j] = new Tile(1);
+		for(int x=0;x<xTiles;x++){
+			for(int y=0;y<yTiles;y++){				
+				tileLayer[x][y] = new Tile(1);
 			}
 		}
 	}
 	
-	// Add player 
-	public void addEntityPlayer(EntityPlayer entity){
-		player = entity;
-	}
-	
-	// If there is not an entity, add it
-	public boolean addEntity(Entity entity, int x, int y){		
+	// General entity
+	public boolean addEntity(Entity entity, int x, int y){
 		if(entityAt(x,y)) {
 			return false;
 		}
 		entityLayer[x][y] = entity;
-		otherEntities.add(entity);
+		entities.add(entity);
+
+		return true;
+	}
+	
+	// Add player 
+	public boolean addEntityPlayer(EntityPlayer entity){
+		player = entity;
+		if(entityAt(player.getLocationX(),player.getLocationY())){
+			return false;
+		}
+		entityLayer[player.getLocationX()][player.getLocationY()] = player;
+		return true;
+	}
+	
+	/* Can all be stored in the same data structure
+	 * 
+	 * 
+	// If there is not an entity, add an Obstacle Entity
+	public boolean addObstacleEntity(EntityObstacle obstacle, int x, int y){		
+		if(entityAt(x,y)) {
+			return false;
+		}
+		entityLayer[x][y] = obstacle;
+		obstacles.add(obstacle);
 		
 		return true;
 	}
 	
+	// If there is not an entity, add an Enemy Entity
+	public boolean addEnemyEntity(EntityEnemy enemy, int x, int y){		
+		if(entityAt(x,y)) {
+			return false;
+		}
+		entityLayer[x][y] = enemy;
+		enemies.add(enemy);
+		
+		return true;
+	}
+	
+	public boolean addItemEntity(EntityItem item, int x, int y){
+		if(entityAt(x,y)) {
+			return false;
+		}
+		entityLayer[x][y] = item;
+		items.add(item);
+		
+		return true;
+	
+	}
+	*/
+	
+	
+
 	// If there is an entity, delete it	
 	public void deleteEntity(int x, int y){
 		if(entityAt(x,y)){
+			Entity rem = entityLayer[x][y];
 			entityLayer[x][y] = null;
+			for(int i=0;i<entities.size();i++){
+				Entity check = entities.get(i);
+				if(check.getLocationX() == rem.getLocationX() && check.getLocationY() == rem.getLocationY())
+					entities.remove(i);
+			}
 		}
 	}
 	
@@ -78,6 +138,16 @@ public class Room {
 		}
 	}
 	
+	// Checks surroundings if there is something (up/down/left/right)
+	public boolean entityAround(Entity e){
+		int xLoc = e.getLocationX();
+		int yLoc = e.getLocationY();
+		
+		// Check around (left, right, up, down) if there is an entity. If so, return true
+		
+		return false;
+	}
+	
 	// Checks if there is something there
 	public boolean entityAt(int x, int y){
 		if(x > xTiles-1 || x < 0 || y > yTiles-1 || y < 0) return false;
@@ -107,17 +177,37 @@ public class Room {
 		return entityLayer;
 	}
 	
+	// Getters
+	
 	public int getTile(int x, int y){
 		return tileLayer[x][y].getTile();
 	}
 	
+	/*
+	public LinkedList<EntityEnemy> getEnemies(){
+		return enemies;
+	}
+	
+	public LinkedList<EntityObstacle> getObstacles(){
+		return obstacles;
+	}
+	
+	public LinkedList<EntityItem> getItems(){
+		return items;
+	}
+	*/
+	
 	public LinkedList<Entity> getEntities(){
-		return otherEntities;
+		return entities;
 	}
 	
 	//=============PLAYER SPECIFIC=========
 
 	// Returns players location (x and y coordinates)
+	
+	public EntityPlayer getPlayer(){
+		return player;
+	}
 	
 	public int getPlayerX(){
 		if(player != null)

@@ -8,28 +8,30 @@ public class RoomManager {
 	private EntityPlayer player;
 	
 	// Add all the entities from room
-	public RoomManager(Room room, EntityPlayer player){
+	public RoomManager(Room room){
 		this.room = room;
-		this.player = player;
+		this.player = room.getPlayer();
 
 	}
 	
 	// moves the player
 	public boolean movePlayer(char direction){
-		player.updateRoom(room);
-		if(player.move(direction)){
-			room = player.getRoom();
+
+		if(player.move(room,direction)){
+
 			return true;
 		}
 		return false;
 	}
 	
-	// Player atk conditions
-	public String playerAtk(Entity entity){
+	// Player atk conditions (depreciated, see EntityPlayer)
+	
+/*	public String playerAtk(Entity entity){
 		// player hits enemy
 		if(entity instanceof EntityEnemy){
-			entity.onHit(player.atk);
-			updateEntity(entity);
+//			EntityEnemy e = (EntityEnemy) entity;
+			Entity e = entity;
+			e.onHit(room,player.atk);
 			return entity.getName();
 		}
 		// player hits item
@@ -43,27 +45,17 @@ public class RoomManager {
 		}
 		else return "X";
 	}
+*/
 	
-	public void enemyAtk(Entity entity){
-		
-	}
 	
 	// Update map for enemy, Execute enemy move, update room (entity move() default returns Room)
 	public boolean moveEnemies(){
 		for(Entity e : room.getEntities()){
-			e.updateRoom(room);
-			room = e.move();
+			e.move(room);
 		}
 		return true;
 	}
 	
-	// Updates data on entities
-	public void updateEntity(Entity e){
-		int x = e.getLocationX();
-		int y = e.getLocationY();
-		room.deleteEntity(x, y);
-		if(!e.defeated()) room.addEntity(e, x, y);
-	}
 	
 	// Changes the room
 	public Room changeRoom(Room room){
@@ -72,6 +64,8 @@ public class RoomManager {
 		return old;
 	}
 	
+	
+	// Getters
 	public Room getRoom(){
 		return room;
 	}
