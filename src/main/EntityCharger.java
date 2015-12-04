@@ -20,7 +20,7 @@ public class EntityCharger extends EntityEnemy {
 	}
 	
 	public void onHit(Room room, int atk){
-		hp = hp-((atk-def)/2);
+		hp = hp-((atk-def));
 		if(hp <= 0){
 			updateEntity(room);
 		}
