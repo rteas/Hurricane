@@ -10,4 +10,5 @@ Main section where code is being executed : BasicGame.java </br>
   There will be a loop with:</br>
   render();</br>
   update();</br>
+  </br>
 Press [ENTER] to end player phase.</br>
