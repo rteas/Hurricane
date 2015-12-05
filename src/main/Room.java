@@ -37,11 +37,11 @@ public class Room {
 		}
 	}
 	
-	public boolean addEntity(Entity entity, int x, int y){
-		if(entityAt(x,y)) {
+	public boolean addEntity(Entity entity){
+		if(entityAt(entity.locationX,entity.locationY)) {
 			return false;
 		}
-		entityLayer[x][y] = entity;
+		entityLayer[entity.locationX][entity.locationY] = entity;
 		entities.add(entity);
 
 		return true;

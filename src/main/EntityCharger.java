@@ -36,21 +36,10 @@ public class EntityCharger extends EntityEnemy {
 	
 	// Enemy moves and attacks(maybe)
 	// Check EntityEnemy for hitPlayer(Room room);
+	/* Customize
 	public void move(Room room){
-		// Checks if there is a player nearby, attack, end turn
 
-		// Else move towards player, if in range, attack and end turn
-		
-		// set as moveleft
-//		room.moveEntity(this, locationX-1, locationY);
-		// set as random
-		int toMove = (int)(Math.random()*100);
-		int dir = toMove % 4;
-		switch(dir){
-		case 0: room.moveEntity(this, locationX-1, locationY); break;
-		case 1: room.moveEntity(this, locationX+1, locationY); break;
-		case 2: room.moveEntity(this, locationX, locationY-1); break;
-		case 3: room.moveEntity(this, locationX, locationY+1); break;
-		}
+
 	}
+	*/
 }

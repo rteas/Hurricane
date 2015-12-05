@@ -65,6 +65,8 @@ public class BasicGame extends BasicGameState {
 	// Test
 	EntityObstacle eo;
 	EntityEnemy enemy;
+	EntityEnemy enemy2;
+	EntityEnemy rat;
 	//public String entityHit = "Nothing";
 	
 	// Transforms array -> pixel coordinates for drawing
@@ -82,14 +84,17 @@ public class BasicGame extends BasicGameState {
 		// Debug, spawning, and stuff goes here...
 		room = new Room(11,7);
 		eo = new EntityObstacle("Rock",3,3,3);
-		room.addEntity(eo, 3, 3);
+		room.addEntity(eo);
 		enemy = new EntityCharger("Charger",100,3,5);
-		room.addEntity(enemy, 3, 5);
+		room.addEntity(enemy);
+		enemy2 = new EntityCharger("Charger",100,4,4);
+		room.addEntity(enemy2);
+		rat = new EntityRat("Rat", 100, 1,5);
+		room.addEntity(rat);
+		
 		
 		tileSheet = new SpriteSheet("tileImgs/dTile.png",tileSize,tileSize);
-		rockSheet = new SpriteSheet("obstacleImgs/brokenRocks.png", tileSize, tileSize);
-		enemySheet = new SpriteSheet("enemies/chargerX.png", tileSize, tileSize);
-		mageSheet = new SpriteSheet("enemies/mageIdle.png",tileSize,tileSize);
+
 
 		
 		
@@ -135,7 +140,7 @@ public class BasicGame extends BasicGameState {
 //		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
 		
 		// Draw enemies/items/obstacles (to be done soon)
-		for(Entity e: rm.getEntities()){
+		for(Entity e: room.getEntities()){
 			if(!(e instanceof EntityPlayer)){
 				/*
 				if(!rm.isPlayerTurn()){
@@ -236,6 +241,8 @@ public class BasicGame extends BasicGameState {
 		
 		// else enemy phase/turn
 		else{
+			// drawing with movement (in progress)
+			
 			if(enemyMoving){
 				// Move enemies (draw)
 				for(Entity e: room.getEntities()){
@@ -254,6 +261,7 @@ public class BasicGame extends BasicGameState {
 					}
 				}
 			}
+			
 			
 		}
 		
