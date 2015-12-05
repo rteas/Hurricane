@@ -36,8 +36,10 @@ public class BasicGame extends BasicGameState {
 	private int offsetY = 68;
 	
 	// Drawing locations
-	private float playerX = offsetX + 100;
-	private float playerY = offsetY + 100;
+	private float playerX;
+	private float playerY;
+	private float enemyX;
+	private float enemyY;
 	int offset = 1*(speed/100);
 //	boolean collide = false;
 	
@@ -57,14 +59,13 @@ public class BasicGame extends BasicGameState {
 
 	
 	
-	private boolean playerPhase = true;
 //	private boolean canAttack = false;
 
 	
 	// Test
 	EntityObstacle eo;
 	EntityEnemy enemy;
-	public String entityHit = "Nothing";
+	//public String entityHit = "Nothing";
 	
 	// Transforms array -> pixel coordinates for drawing
 	public int getX(int x){
@@ -95,6 +96,8 @@ public class BasicGame extends BasicGameState {
 		
 		player = new EntityPlayer("Hero",100,1,1);
 		room.addEntityPlayer(player);
+		playerX = getX(player.locationX);
+		playerY = getY(player.locationY);
 		rm = new RoomManager(room);
 //		entities = rm.getEntities();
 		
@@ -123,7 +126,9 @@ public class BasicGame extends BasicGameState {
 		g.drawString("Mouse clicked at (" + clickX + ", "+ clickY + ")",600, 0);
 		g.drawString("Attack: " + attackDirection, 400, 0);
 		g.drawString("Player at: ("+ rm.getPlayer().getLocationX() + ", "+ player.getLocationY() + ")",10, 30);
-		g.drawString("Hit: "+ entityHit + "!", 10, 50);
+		if(rm.isPlayerTurn()) g.drawString("Phase: player", 200, 40);
+		else g.drawString("Phase: enemy", 200, 30);
+//		g.drawString("Hit: "+ entityHit + "!", 10, 50);
 		
 //		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
 //		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
@@ -131,15 +136,38 @@ public class BasicGame extends BasicGameState {
 		// Draw enemies/items/obstacles (to be done soon)
 		for(Entity e: rm.getEntities()){
 			if(!(e instanceof EntityPlayer)){
+				/*
+				if(!rm.isPlayerTurn()){
+					float destinationX = getX(e.locationX);
+					float destinationY = getY(e.locationY);
+					boolean enemyMoving = true;
+					int x = getX(e.prevX);
+					int y = getY(e.prevY);
+					
+					while(enemyMoving){
+
+
+						e.getIdleSheet().draw(x, y);
+						
+						if(x >= destinationX && y >= destinationY){
+							enemyMoving = false;
+						}
+					}
+				}
+				else{
+					e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+				}
+				*/
 				e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+				
 				// HP BAR
 				if(!(e instanceof EntityObstacle)){
 					g.setColor(Color.black);
-					g.fillRect(getX(e.getLocationX()), getY(e.getLocationY())+tileSize-10, 80, 5);
+					g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, tileSize-10, 5);
 					g.setColor(Color.red);
-					g.fillRect(getX(e.getLocationX()), getY(e.getLocationY())+tileSize-10, (int)(80*((double)e.hp/(double)e.maxHp)), 5);
+					g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
 					g.setColor(Color.white);
-					g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
+//					g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
 				}
 			}
 			
@@ -189,7 +217,7 @@ public class BasicGame extends BasicGameState {
 		// TODO Auto-generated method stub
 		
 		// PRESS ENTER TO SKIP TO ENEMY PHASE
-		if (playerPhase) {
+		if (rm.isPlayerTurn()) {
 			if (!player.isIdle()) {
 				movePlayer(player.getDirection(), destinationX, destinationY, d);
 			} 
@@ -233,23 +261,23 @@ public class BasicGame extends BasicGameState {
 			// LEFT
 			if(clickX <= playerX && clickY >= playerY && clickY <= playerY+tileSize){
 				player.atkMelee(room, LEFT);
-				attackDirection = 'L';
+				attackDirection = LEFT;
 			}
 			// RIGHT
 			else if(clickX >= playerX+tileSize && clickY >= playerY && clickY <= playerY+tileSize){
 				player.atkMelee(room, RIGHT);
-				attackDirection = 'R';
+				attackDirection = RIGHT;
 
 			}
 			// UP
 			else if(clickY <= playerY && clickX >= playerX && clickX <= playerX+tileSize){
 				player.atkMelee(room, UP);
-				attackDirection='U';
+				attackDirection= UP;
 			}
 			// DOWN
 			else if(clickY >= playerY+tileSize && clickX >= playerX && clickX <= playerX+tileSize){
 				player.atkMelee(room, DOWN);
-				attackDirection='D';
+				attackDirection= DOWN;
 			}
 			// UNAVAILABLE
 			else{
@@ -302,7 +330,51 @@ public class BasicGame extends BasicGameState {
 		}
 	}
 	
+	/*
+	public void moveEnemy(EntityEnemy e, float destinationX, float destinationY, int d){
+		char enemyDirection = e.getDirection();
+		
+		switch(enemyDirection){
+			case UP: 
+				if(y>destinationY){ 
+					y-= (y-destinationY)/200;
+				}
+				else{
+					y = (int)destinationY;
+					enemyMoving = false;
+				}
+				break;
+			case DOWN: 
+				if(y<destinationY){ 
+					y+= (y-destinationY)/200;
+				}
+				else{
+					y = (int)destinationY;
+					enemyMoving = false;
+				}
+				break;
+			case LEFT: 
+				if(x>destinationX){ 
+					x-= (x-destinationX)/200;
+				}
+				else{
+					x = (int)destinationX;
+					enemyMoving = false;
+				}
+				break;
+			case RIGHT:
+				if(x>destinationX){ 
+					x-= (x-destinationX)/200;
+				}
+				else{
+					x = (int)destinationX;
+					enemyMoving = false;
+				}
+				break;
+		}
+	}
 	
+	*/
 	// Initial movement 'WASD'
 	public boolean setMovePlayer(Input input){
 		if(input.isKeyPressed(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){
@@ -338,8 +410,8 @@ public class BasicGame extends BasicGameState {
 			}
 		}
 		// End turn
-		else if(input.isKeyDown(Input.KEY_ENTER)){
-			playerPhase = false;
+		else if(input.isKeyPressed(Input.KEY_ENTER)){
+			rm.endPlayerTurn();
 		}
 		else{
 			player.setIdle(true);

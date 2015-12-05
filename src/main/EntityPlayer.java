@@ -101,14 +101,18 @@ public class EntityPlayer extends Entity{
 					return e;
 				}
 				return null;
-			default:
+			case 'R':
 				if (room.entityAt(locationX + 1, locationY)) {
 					Entity e = room.getEntity(locationX + 1, locationY);
 					e.onHit(room, atk);
 					return e;
 				}
 				return null;
+				
+			default:
+				return null;
 			}
+			
 		}
 		else return null;
 	}
@@ -121,9 +125,10 @@ public class EntityPlayer extends Entity{
 			return room.entityAt(locationX, locationY+1);
 		case 'L': 
 			return room.entityAt(locationX-1, locationY);
-		default: 
+		case 'R': 
 			return room.entityAt(locationX+1, locationY);
 		}
+		return false;
 	}
 	
 	public boolean move(Room room, char direction){
@@ -132,28 +137,24 @@ public class EntityPlayer extends Entity{
 		switch(direction){
 			case 'U':
 				if(room.moveEntity(this, this.getLocationX(), this.getLocationY()-1)){
-					setLocationY(this.getLocationY()-1);
 					moves--;
 					return true;
 				}
 				break;
 			case 'D':
 				if(room.moveEntity(this, this.getLocationX(), this.getLocationY()+1)){
-					setLocationY(this.getLocationY()+1);
 					moves--;
 					return true;
 				}
 				break;
 			case 'L':
 				if(room.moveEntity(this, this.getLocationX()-1, this.getLocationY())){
-					setLocationX(this.getLocationX()-1);
 					moves--;
 					return true;
 				}
 				break;
 			case 'R':
 				if(room.moveEntity(this, this.getLocationX()+1, this.getLocationY())){
-					setLocationX(this.getLocationX()+1);
 					moves--;
 					return true;
 				}

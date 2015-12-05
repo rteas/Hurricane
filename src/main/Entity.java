@@ -27,6 +27,8 @@ public class Entity {
 	// Formerly locationX, locationY
 	public int locationX;
 	public int locationY;
+	public int prevX;
+	public int prevY;
 	public int speed;
 	public boolean idle = true;
 	public boolean attacking = false;
@@ -56,6 +58,11 @@ public class Entity {
 			// Obtain player location (probably better in enemy entity)
 			room.getPlayerX();
 			room.getPlayerY();
+			
+			// Moves once left
+			
+			//room.moveEntity(this, locationX-1, locationY);
+			
 			moves--;
 			
 			// Update map
@@ -83,11 +90,13 @@ public class Entity {
 	
 	
 	// Default method called when hit
-	public void onHit(Room room,int atk){
-		hp = hp - (atk-def);
+	public int onHit(Room room,int atk){
+		int dmg = atk-def;
+		hp = hp - dmg;
 		if(hp <= 0){
 			updateEntity(room);
 		}
+		return dmg;
 	}
 	
 	public boolean defeated(){

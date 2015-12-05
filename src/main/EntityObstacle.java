@@ -20,8 +20,8 @@ public class EntityObstacle extends Entity{
 	}
 	
 	
-	public void onHit(Room room, int atk){
-		
+	public int onHit(Room room, int atk){
+		return 0;
 	}
 	
 	public void move(Room room){

@@ -132,8 +132,25 @@ public class Room {
 			return false;
 		}
 		else{
-			deleteEntity(entity.getLocationX(),entity.getLocationY());
-			addEntity(entity,x,y);
+			entity.prevX = entity.getLocationX();
+			entity.prevY = entity.getLocationY();
+			// set direction
+			if (x<entity.prevX){
+				entity.setDirection('L');
+			}
+			else if(x>entity.prevX){
+				entity.setDirection('R');
+			}
+			else if(y<entity.prevY){
+				entity.setDirection('U');
+			}
+			else if(y>entity.prevY){
+				entity.setDirection('D');
+			}
+			entityLayer[entity.prevX][entity.prevY] = null;
+			entityLayer[x][y] = entity;
+			entity.setLocationX(x);
+			entity.setLocationY(y);
 			return true;
 		}
 	}

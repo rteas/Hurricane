@@ -6,6 +6,7 @@ import java.util.LinkedList;
 public class RoomManager {
 	private Room room;
 	private EntityPlayer player;
+	private boolean playerTurn = true;
 	
 	// Add all the entities from room
 	public RoomManager(Room room){
@@ -17,11 +18,8 @@ public class RoomManager {
 	// moves the player
 	public boolean movePlayer(char direction){
 
-		if(player.move(room,direction)){
-
-			return true;
-		}
-		return false;
+		return (player.move(room,direction));
+		
 	}
 	
 	// Player atk conditions (depreciated, see EntityPlayer)
@@ -47,14 +45,29 @@ public class RoomManager {
 	}
 */
 	
+	public void endPlayerTurn(){
+		playerTurn = false;
+	}
+	
+	public void startPlayerTurn(){
+		playerTurn = true;
+	}
+	
+	public boolean isPlayerTurn(){
+		return playerTurn;
+	}
 	
 	// Update map for enemy, Execute enemy move, update room (entity move() default returns Room)
 	public boolean moveEnemies(){
 		for(Entity e : room.getEntities()){
-			e.move(room);
+			if(e instanceof EntityEnemy){
+				e.move(room);
+			}
 		}
+		startPlayerTurn();
 		return true;
 	}
+	
 	
 	
 	// Changes the room
