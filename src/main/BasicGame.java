@@ -130,8 +130,18 @@ public class BasicGame extends BasicGameState {
 		
 		// Draw enemies/items/obstacles (to be done soon)
 		for(Entity e: rm.getEntities()){
-			if(!(e instanceof EntityPlayer))
-			e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+			if(!(e instanceof EntityPlayer)){
+				e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+				// HP BAR
+				if(!(e instanceof EntityObstacle)){
+					g.setColor(Color.black);
+					g.fillRect(getX(e.getLocationX()), getY(e.getLocationY())+tileSize-10, 80, 5);
+					g.setColor(Color.red);
+					g.fillRect(getX(e.getLocationX()), getY(e.getLocationY())+tileSize-10, (int)(80*((double)e.hp/(double)e.maxHp)), 5);
+					g.setColor(Color.white);
+					g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
+				}
+			}
 			
 		}
 		
@@ -233,18 +243,12 @@ public class BasicGame extends BasicGameState {
 			}
 			// UP
 			else if(clickY <= playerY && clickX >= playerX && clickX <= playerX+tileSize){
-				player.setAttacking(true);
-				player.setDirection(UP);
-//				Entity e = player.atkMelee(rm.getRoom(),UP);
-//				entityHit = rm.playerAtk(e);
+				player.atkMelee(room, UP);
 				attackDirection='U';
 			}
 			// DOWN
 			else if(clickY >= playerY+tileSize && clickX >= playerX && clickX <= playerX+tileSize){
-				player.setAttacking(true);
-				player.setDirection(DOWN);
-//				Entity e = player.atkMelee(rm.getRoom(),DOWN);
-//				entityHit = rm.playerAtk(e);
+				player.atkMelee(room, DOWN);
 				attackDirection='D';
 			}
 			// UNAVAILABLE

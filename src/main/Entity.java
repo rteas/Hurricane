@@ -18,6 +18,7 @@ public class Entity {
 	
 	public String name;
 	public int hp;
+	public int maxHp = 100;
 	public int def;
 	public int atk;
 	public int mp;
