@@ -13,6 +13,12 @@ import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+
+// Three main methods
+// init: the initializer
+// render: the drawer/rendering 
+// update: game processing
+
 public class BasicGame extends BasicGameState {
 	
 	public static int id = 1;

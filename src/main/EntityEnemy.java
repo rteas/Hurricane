@@ -22,6 +22,8 @@ public class EntityEnemy extends Entity {
 		return room.getPlayer().onHit(room, atk);
 	}
 	
+	// Moves enemy randomly using rng 
+	// Calls room to move the entity
 	public void move(Room room){
 		int toMove = (int)(Math.random()*100);
 		int dir = toMove % 4;
