@@ -17,4 +17,8 @@ public class EntityEnemy extends Entity {
 	public int move(){
 		return 0;
 	}
+	
+	public int attackPlayer(Room room){
+		return room.getPlayer().onHit(room, atk);
+	}
 }

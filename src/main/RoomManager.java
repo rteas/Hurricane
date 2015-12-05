@@ -22,29 +22,6 @@ public class RoomManager {
 		
 	}
 	
-	// Player atk conditions (depreciated, see EntityPlayer)
-	
-/*	public String playerAtk(Entity entity){
-		// player hits enemy
-		if(entity instanceof EntityEnemy){
-//			EntityEnemy e = (EntityEnemy) entity;
-			Entity e = entity;
-			e.onHit(room,player.atk);
-			return entity.getName();
-		}
-		// player hits item
-		else if(entity instanceof EntityItem){
-			room.deleteEntity(entity.getLocationX(), entity.getLocationY());
-			return entity.getName();
-		}
-		// player hits obstacle
-		else if(entity instanceof EntityObstacle){
-			return entity.getName();
-		}
-		else return "X";
-	}
-*/
-	
 	public void endPlayerTurn(){
 		playerTurn = false;
 	}
@@ -58,6 +35,8 @@ public class RoomManager {
 	}
 	
 	// Update map for enemy, Execute enemy move, update room (entity move() default returns Room)
+	// Done in BasicGame: update()
+	/*
 	public boolean moveEnemies(){
 		for(Entity e : room.getEntities()){
 			if(e instanceof EntityEnemy){
@@ -67,7 +46,7 @@ public class RoomManager {
 		startPlayerTurn();
 		return true;
 	}
-	
+	*/
 	
 	
 	// Changes the room

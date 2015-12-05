@@ -40,7 +40,7 @@ public class BasicGame extends BasicGameState {
 	private float playerY;
 	private float enemyX;
 	private float enemyY;
-	int offset = 1*(speed/100);
+
 //	boolean collide = false;
 	
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -59,7 +59,7 @@ public class BasicGame extends BasicGameState {
 
 	
 	
-//	private boolean canAttack = false;
+	private boolean enemyMoving = false;
 
 	
 	// Test
@@ -80,7 +80,7 @@ public class BasicGame extends BasicGameState {
 		// TODO Auto-generated method stub
 		
 		// Debug, spawning, and stuff goes here...
-		room = new Room(12,7);
+		room = new Room(11,7);
 		eo = new EntityObstacle("Rock",3,3,3);
 		room.addEntity(eo, 3, 3);
 		enemy = new EntityCharger("Charger",100,3,5);
@@ -99,6 +99,7 @@ public class BasicGame extends BasicGameState {
 		playerX = getX(player.locationX);
 		playerY = getY(player.locationY);
 		rm = new RoomManager(room);
+		room = rm.getRoom();
 //		entities = rm.getEntities();
 		
 		player = rm.getPlayer();
@@ -167,6 +168,7 @@ public class BasicGame extends BasicGameState {
 					g.setColor(Color.red);
 					g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
 					g.setColor(Color.white);
+					// Debug
 //					g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
 				}
 			}
@@ -234,7 +236,25 @@ public class BasicGame extends BasicGameState {
 		
 		// else enemy phase/turn
 		else{
-			rm.moveEnemies();
+			if(enemyMoving){
+				// Move enemies (draw)
+				for(Entity e: room.getEntities()){
+					if(e instanceof EntityEnemy){
+						
+					}
+				}
+				enemyMoving = false;
+				rm.startPlayerTurn();
+			}
+			else{
+				enemyMoving = true;
+				for(Entity e : room.getEntities()){
+					if(e instanceof EntityEnemy){
+						e.move(room);
+					}
+				}
+			}
+			
 		}
 		
 
@@ -279,7 +299,7 @@ public class BasicGame extends BasicGameState {
 				player.atkMelee(room, DOWN);
 				attackDirection= DOWN;
 			}
-			// UNAVAILABLE
+			// INVALID INPUT
 			else{
 				attackDirection='X';
 			}

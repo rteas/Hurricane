@@ -76,10 +76,12 @@ public class Entity {
 		return true;
 	}
 	
-	public void attack(){
+	public boolean attack(){
 		if(attacks > 0){
 			attacks--;
+			return true;
 		}	
+		return false;
 	}
 	
 	public void updateEntity(Room room){

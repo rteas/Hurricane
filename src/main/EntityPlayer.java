@@ -83,28 +83,60 @@ public class EntityPlayer extends Entity{
 			case 'U':
 				if (room.entityAt(locationX, locationY - 1)) {
 					Entity e = room.getEntity(locationX, locationY - 1);
-					e.onHit(room, atk);
+					if (e instanceof EntityEnemy){
+						e.onHit(room, atk);
+					}
+					else if (e instanceof EntityItem){
+						
+					}
+					else{
+						
+					}
 					return e;
 				}
 				return null;
 			case 'D':
 				if (room.entityAt(locationX, locationY + 1)) {
 					Entity e = room.getEntity(locationX, locationY + 1);
-					e.onHit(room, atk);
+					if (e instanceof EntityEnemy){
+						e.onHit(room, atk);
+					}
+					else if (e instanceof EntityItem){
+						
+					}
+					else{
+						
+					}
 					return e;
 				}
 				return null;
 			case 'L':
 				if (room.entityAt(locationX - 1, locationY)) {
 					Entity e = room.getEntity(locationX - 1, locationY);
-					e.onHit(room, atk);
+					if (e instanceof EntityEnemy){
+						e.onHit(room, atk);
+					}
+					else if (e instanceof EntityItem){
+						
+					}
+					else{
+						
+					}
 					return e;
 				}
 				return null;
 			case 'R':
 				if (room.entityAt(locationX + 1, locationY)) {
 					Entity e = room.getEntity(locationX + 1, locationY);
-					e.onHit(room, atk);
+					if (e instanceof EntityEnemy){
+						e.onHit(room, atk);
+					}
+					else if (e instanceof EntityItem){
+						
+					}
+					else{
+						
+					}
 					return e;
 				}
 				return null;

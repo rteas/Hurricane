@@ -37,7 +37,6 @@ public class Room {
 		}
 	}
 	
-	// General entity
 	public boolean addEntity(Entity entity, int x, int y){
 		if(entityAt(x,y)) {
 			return false;
@@ -57,45 +56,6 @@ public class Room {
 		entityLayer[player.getLocationX()][player.getLocationY()] = player;
 		return true;
 	}
-	
-	/* Can all be stored in the same data structure
-	 * 
-	 * 
-	// If there is not an entity, add an Obstacle Entity
-	public boolean addObstacleEntity(EntityObstacle obstacle, int x, int y){		
-		if(entityAt(x,y)) {
-			return false;
-		}
-		entityLayer[x][y] = obstacle;
-		obstacles.add(obstacle);
-		
-		return true;
-	}
-	
-	// If there is not an entity, add an Enemy Entity
-	public boolean addEnemyEntity(EntityEnemy enemy, int x, int y){		
-		if(entityAt(x,y)) {
-			return false;
-		}
-		entityLayer[x][y] = enemy;
-		enemies.add(enemy);
-		
-		return true;
-	}
-	
-	public boolean addItemEntity(EntityItem item, int x, int y){
-		if(entityAt(x,y)) {
-			return false;
-		}
-		entityLayer[x][y] = item;
-		items.add(item);
-		
-		return true;
-	
-	}
-	*/
-	
-	
 
 	// If there is an entity, delete it	
 	public void deleteEntity(int x, int y){
