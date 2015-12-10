@@ -50,6 +50,7 @@ public class Room {
 	// Add player 
 	public boolean addEntityPlayer(EntityPlayer entity){
 		player = entity;
+		entities.add(player);
 		if(entityAt(player.getLocationX(),player.getLocationY())){
 			return false;
 		}

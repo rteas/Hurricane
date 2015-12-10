@@ -43,6 +43,7 @@ public class EntityPlayer extends Entity{
 	
 	public EntityPlayer(String name, int hp, int locationX, int locationY) {
 		super(name, hp, locationX, locationY);
+		def = 90;
 	}
 	
 	// Returns spritesheet based on direction the character is facing (see parent class for directions)
@@ -87,7 +88,8 @@ public class EntityPlayer extends Entity{
 						e.onHit(room, atk);
 					}
 					else if (e instanceof EntityItem){
-						
+						EntityItem item = (EntityItem) e;
+						item.onHit(this);
 					}
 					else{
 						
@@ -102,7 +104,8 @@ public class EntityPlayer extends Entity{
 						e.onHit(room, atk);
 					}
 					else if (e instanceof EntityItem){
-						
+						EntityItem item = (EntityItem) e;
+						item.onHit(this);
 					}
 					else{
 						
@@ -117,7 +120,8 @@ public class EntityPlayer extends Entity{
 						e.onHit(room, atk);
 					}
 					else if (e instanceof EntityItem){
-						
+						EntityItem item = (EntityItem) e;
+						item.onHit(this);
 					}
 					else{
 						
@@ -132,7 +136,8 @@ public class EntityPlayer extends Entity{
 						e.onHit(room, atk);
 					}
 					else if (e instanceof EntityItem){
-						
+						EntityItem item = (EntityItem) e;
+						item.onHit(this);
 					}
 					else{
 						
@@ -195,6 +200,12 @@ public class EntityPlayer extends Entity{
 			}
 		return false;
 		
+	}
+	
+	public int onHit(int atk){
+		int dmg = atk-def;
+		hp -= dmg;
+		return hp;
 	}
 	
 	

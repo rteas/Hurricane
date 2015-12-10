@@ -28,6 +28,12 @@ public class RoomManager {
 	
 	public void startPlayerTurn(){
 		playerTurn = true;
+		for(Entity e : room.getEntities()){
+			if(e instanceof EntityEnemy){
+				EntityEnemy en = (EntityEnemy)e;
+				en.refresh();
+			}
+		}
 	}
 	
 	public boolean isPlayerTurn(){

@@ -5,10 +5,13 @@ import org.newdawn.slick.SpriteSheet;
 
 public class EntityCharger extends EntityEnemy {
 	
-	private SpriteSheet idleSheet;
+
 	{
 		try{
-			idleSheet = new SpriteSheet("enemies/chargerX.png",100,100);
+			idleUp = new SpriteSheet("enemies/chargerYU.png",100,100);
+			idleDown = new SpriteSheet("enemies/chargerYD.png",100,100);
+			idleLeft = new SpriteSheet("enemies/chargerXL.png",100,100);
+			idleRight = new SpriteSheet("enemies/chargerXR.png",100,100);
 		}
 		catch(SlickException e){
 			System.out.println(e);
@@ -19,6 +22,16 @@ public class EntityCharger extends EntityEnemy {
 		super(name, hp, locationX, locationY);
 	}
 	
+	/*
+	public SpriteSheet getIdleSheet(){
+		switch(direction){
+			case 'U': return idleUp;
+			case 'D': return idleDown;
+			case 'L': return idleLeft;
+			default: return idleRight;
+		}
+	}
+	*/
 	// Overwrite? currently the same
 	public int onHit(Room room, int atk){
 		int dmg = atk-def;
@@ -28,10 +41,6 @@ public class EntityCharger extends EntityEnemy {
 		}
 		return dmg;
 		
-	}
-	
-	public SpriteSheet getIdleSheet(){
-		return idleSheet;
 	}
 	
 	// Enemy moves and attacks(maybe)

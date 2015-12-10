@@ -46,6 +46,8 @@ public class BasicGame extends BasicGameState {
 	private float playerY;
 	private float enemyX;
 	private float enemyY;
+	private float enemyDestX;
+	private float enemyDestY;
 
 //	boolean collide = false;
 	
@@ -61,11 +63,12 @@ public class BasicGame extends BasicGameState {
 	private RoomManager rm;
 	//private LinkedList<Entity> entities;
 	
-	private SpriteSheet tileSheet, rockSheet, enemySheet, mageSheet;
+	private SpriteSheet tileSheet;
 
 	
-	
+	// For enemy drawing
 	private boolean enemyMoving = false;
+	private boolean enemyAttacking = false;
 
 	
 	// Test
@@ -101,9 +104,6 @@ public class BasicGame extends BasicGameState {
 		
 		tileSheet = new SpriteSheet("tileImgs/dTile.png",tileSize,tileSize);
 
-
-		
-		
 		
 		player = new EntityPlayer("Hero",100,1,1);
 		room.addEntityPlayer(player);
@@ -139,55 +139,111 @@ public class BasicGame extends BasicGameState {
 		g.drawString("Attack: " + attackDirection, 400, 0);
 		g.drawString("Player at: ("+ rm.getPlayer().getLocationX() + ", "+ player.getLocationY() + ")",10, 30);
 		if(rm.isPlayerTurn()) g.drawString("Phase: player", 200, 40);
-		else g.drawString("Phase: enemy", 200, 30);
+		else g.drawString("Phase: enemy", 200, 40);
+		g.drawString("HP: "+ player.getHp(), 10, 60);
 //		g.drawString("Hit: "+ entityHit + "!", 10, 50);
 		
 //		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
 //		enemySheet.draw(enemy.getLocationX()*tileSize+offsetX, enemy.getLocationY()*tileSize+offsetY);
 		
+		// Draw player depending on current status
+		// Attacking at the bottom 
+		if(player.isIdle()){
+			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
+		}
+		else{
+			player.getMoveSheet().draw(playerX,playerY);
+		}
+		
 		// Draw enemies/items/obstacles (to be done soon)
 		for(Entity e: room.getEntities()){
 			if(!(e instanceof EntityPlayer)){
-				/*
-				if(!rm.isPlayerTurn()){
-					float destinationX = getX(e.locationX);
-					float destinationY = getY(e.locationY);
-					boolean enemyMoving = true;
-					int x = getX(e.prevX);
-					int y = getY(e.prevY);
-					
-					while(enemyMoving){
 
-
-						e.getIdleSheet().draw(x, y);
+				if(!rm.isPlayerTurn() && e instanceof EntityEnemy){
+					if (!e.isIdle()) {
+						int ex = e.getDrawX();
+						int ey = e.getDrawY();
+						e.getIdleSheet().draw(ex, ey);
 						
-						if(x >= destinationX && y >= destinationY){
-							enemyMoving = false;
+						// hp bar
+						g.setColor(Color.black);
+						g.fillRect(ex + 5, ey + tileSize - 10, tileSize - 10, 5);
+						g.setColor(Color.red);
+						g.fillRect(ex + 5, ey + tileSize - 10,
+								(int) ((tileSize - 10) * ((double) e.hp / (double) e.maxHp)), 5);
+						g.setColor(Color.white);
+						// Debug
+						//g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
+					}
+					else if (e.isIdle()){
+						e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+						if(!(e instanceof EntityObstacle)){
+							// Hp bar
+							g.setColor(Color.black);
+							g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, tileSize-10, 5);
+							g.setColor(Color.red);
+							g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
+							g.setColor(Color.white);
+							// Debug
+//							g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
 						}
 					}
+					if(e.isAttacking()){
+							if(e instanceof EntityEnemy){
+								EntityEnemy en = (EntityEnemy) e;
+								SpriteSheet atk = en.getAttackSheet();
+								char d = en.getDirection();
+								if(en.isAttacking()){
+									e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+									switch(d){
+									case UP:
+										atk.draw(getX(en.getLocationX()), getY(en.getLocationY())-tileSize);
+										break;
+									case DOWN:
+										atk.draw(getX(en.getLocationX()), getY(en.getLocationY())+tileSize);
+										break;
+									case LEFT:
+										atk.draw(getX(en.getLocationX())-tileSize, getY(en.getLocationY()));
+										break;
+									case RIGHT:
+										atk.draw(getX(en.getLocationX())+tileSize, getY(en.getLocationY()));
+										break;
+									}
+								}
+								// HP
+								g.setColor(Color.black);
+								g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, tileSize-10, 5);
+								g.setColor(Color.red);
+								g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
+								g.setColor(Color.white);
+								
+							}
+					}
+					
 				}
 				else{
 					e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+					
+					if(!(e instanceof EntityObstacle)){
+						g.setColor(Color.black);
+						g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, tileSize-10, 5);
+						g.setColor(Color.red);
+						g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
+						g.setColor(Color.white);
+						// Debug
+//						g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
+					}
 				}
-				*/
-				e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
+
+//				e.getIdleSheet().draw(getX(e.getLocationX()), getY(e.getLocationY()));
 				
 				// HP BAR
-				if(!(e instanceof EntityObstacle)){
-					g.setColor(Color.black);
-					g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, tileSize-10, 5);
-					g.setColor(Color.red);
-					g.fillRect(getX(e.getLocationX())+5, getY(e.getLocationY())+tileSize-10, (int)((tileSize-10)*((double)e.hp/(double)e.maxHp)), 5);
-					g.setColor(Color.white);
-					// Debug
-//					g.drawString("HP: "+ e.getHp()+ "/" +e.maxHp , getX(e.getLocationX()), getY(e.getLocationY())+tileSize-20);
-				}
+				
+				
+				
 			}
 			
 		}
-		
-
-		// Draw player depending on current status
 		if(player.isAttacking()){
 			char pd = player.getDirection();
 			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
@@ -207,22 +263,7 @@ public class BasicGame extends BasicGameState {
 					break;
 			}
 		}
-		else if(player.isIdle()){
-			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
-		}
-		else{
-			player.getMoveSheet().draw(playerX,playerY);
-		}
 		
-		// Some tutorial stuff
-		/*
-		square = new Rectangle(x,y, 200,200);
-		obstacle = new Rectangle(350,350,50,50);
-		g.drawString("X: "+ x + "Y: " + y,50,50);
-		g.setColor(Color.cyan);
-		g.draw(square);
-		g.draw(obstacle);
-		*/		
 	}
 
 	@Override
@@ -247,24 +288,84 @@ public class BasicGame extends BasicGameState {
 		
 		// else enemy phase/turn
 		else{
-			// drawing with movement (in progress)
+			/* WARNING COMPLEX */
+			// Basically try to cover all the cases of
+			// Enemies moving and attacking independently
+			// Along with proper rendering flags
 			
-			if(enemyMoving){
-				// Move enemies (draw)
+			// enemies moving and attacking
+			if(enemyMoving && enemyAttacking){
 				for(Entity e: room.getEntities()){
 					if(e instanceof EntityEnemy){
+						EntityEnemy en = (EntityEnemy)e;
+						en = (EntityEnemy)e;
+						moveEnemy(en, d);
+						
+						if(!enemyMoving && en.canAttack(room)){
+							en.hitPlayer(room);
+							en.setAttacking(true);
+						}
 						
 					}
 				}
-				enemyMoving = false;
-				rm.startPlayerTurn();
 			}
+			// Move enemies by drawing
+			else if(enemyMoving){
+				for(Entity e: room.getEntities()){
+					if(e instanceof EntityEnemy){
+						EntityEnemy en = (EntityEnemy)e;
+						en = (EntityEnemy)e;
+						moveEnemy(en, d);
+					}
+				}
+				if(!enemyMoving){
+					for(Entity e: room.getEntities()){
+						if (e instanceof EntityEnemy) {
+							EntityEnemy en = (EntityEnemy) e;
+							if (en.canAttack(room)) {
+								en.hitPlayer(room);
+								enemyAttacking = true;
+								en.setAttacking(true);
+							} 
+						}
+					}
+					if(!enemyAttacking){
+						rm.startPlayerTurn();
+					}
+				}
+			}
+			else if(enemyAttacking){
+				for(Entity e: room.getEntities()){
+					if(e instanceof EntityEnemy && e.isIdle()){
+						gc.sleep(200);
+						e.setAttacking(false);
+					}
+				}
+				enemyAttacking = false;
+				
+				if(!enemyMoving){
+					rm.startPlayerTurn();
+				}
+			}
+			// Actual movement on grid (moves once)
 			else{
-				enemyMoving = true;
 				for(Entity e : room.getEntities()){
 					if(e instanceof EntityEnemy){
-						e.move(room);
+						EntityEnemy en = (EntityEnemy)e;
+						
+						if(en.canAttack(room)){
+							en.hitPlayer(room);
+							en.setAttacking(true);
+							enemyAttacking = true;
+						}
+						else if(en.move(room)){
+							setMoveEnemy(en);
+							en.setIdle(false);
+						}
 					}
+				}
+				if(enemyMoving == false && enemyAttacking == false){
+					rm.startPlayerTurn();
 				}
 			}
 			
@@ -364,51 +465,65 @@ public class BasicGame extends BasicGameState {
 		}
 	}
 	
-	/*
-	public void moveEnemy(EntityEnemy e, float destinationX, float destinationY, int d){
-		char enemyDirection = e.getDirection();
-		
-		switch(enemyDirection){
-			case UP: 
-				if(y>destinationY){ 
-					y-= (y-destinationY)/200;
-				}
-				else{
-					y = (int)destinationY;
+	
+	public void moveEnemy(EntityEnemy e, int d){
+		if (!e.isIdle()) {
+			char enemyDirection = e.getDirection();
+
+			int drawY = e.getDrawY();
+			int drawX = e.getDrawX();
+			int finY = e.getFinY();
+			int finX = e.getFinX();
+			switch (enemyDirection) {
+			case UP:
+				if (drawY >= finY) {
+					e.setDrawY(e.getDrawY() - e.speed * d / 1000);
+				} else {
+					e.setDrawY(finY);
+					e.setIdle(true);
 					enemyMoving = false;
 				}
 				break;
-			case DOWN: 
-				if(y<destinationY){ 
-					y+= (y-destinationY)/200;
-				}
-				else{
-					y = (int)destinationY;
+			case DOWN:
+				if (drawY <= finY) {
+					e.setDrawY(e.getDrawY() + e.speed * d / 1000);
+				} else {
+					e.setDrawY(finY);
+					e.setIdle(true);
 					enemyMoving = false;
 				}
 				break;
-			case LEFT: 
-				if(x>destinationX){ 
-					x-= (x-destinationX)/200;
-				}
-				else{
-					x = (int)destinationX;
+			case LEFT:
+				if (drawX >= finX) {
+					e.setDrawX(e.getDrawX() - e.speed * d / 1000);
+				} else {
+					e.setDrawX(finX);
+					e.setIdle(true);
 					enemyMoving = false;
 				}
 				break;
 			case RIGHT:
-				if(x>destinationX){ 
-					x-= (x-destinationX)/200;
-				}
-				else{
-					x = (int)destinationX;
+				if (drawX <= finX) {
+					e.setDrawX(e.getDrawX() + e.speed * d / 1000);
+				} else {
+					e.setDrawX(finX);
+					e.setIdle(true);
 					enemyMoving = false;
 				}
 				break;
+			}
 		}
 	}
 	
-	*/
+	public void setMoveEnemy(EntityEnemy e){
+		e.setIdle(false);
+		enemyMoving = true;
+		e.setDrawX(getX(e.prevX));
+		e.setDrawY(getY(e.prevY));
+		e.setFinX(getX(e.getLocationX()));
+		e.setFinY(getY(e.getLocationY()));
+	}
+
 	// Initial movement 'WASD'
 	public boolean setMovePlayer(Input input){
 		if(input.isKeyPressed(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){

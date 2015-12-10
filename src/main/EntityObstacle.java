@@ -9,6 +9,7 @@ public class EntityObstacle extends Entity{
 	{
 		try{
 			idleSheet = new SpriteSheet("obstacleImgs/brokenRocks.png",100,100);
+			
 		}
 		catch(SlickException e){
 			System.out.println(e);
@@ -24,8 +25,8 @@ public class EntityObstacle extends Entity{
 		return 0;
 	}
 	
-	public void move(Room room){
-		
+	public boolean move(Room room){
+		return false;
 	}
 	
 	public SpriteSheet getIdleSheet(){

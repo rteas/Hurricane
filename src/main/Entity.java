@@ -16,25 +16,32 @@ public class Entity {
 		}
 	}
 	
-	public String name;
-	public int hp;
-	public int maxHp = 100;
-	public int def;
-	public int atk;
-	public int mp;
-	public int moves;
-	public int attacks;
-	// Formerly locationX, locationY
-	public int locationX;
-	public int locationY;
-	public int prevX;
-	public int prevY;
-	public int speed;
-	public boolean idle = true;
-	public boolean attacking = false;
+	protected String name;
+	protected int hp;
+	protected int maxHp;
+	protected int def;
+	protected int atk;
+	protected int mp;
+	protected int moves;
+	protected int attacks;
+	// Grid Location (by array)
+	protected int locationX;
+	protected int locationY;
+	// Previous Location
+	protected int prevX;
+	protected int prevY;
+	// Location used for drawing
+	protected int drawX;
+	protected int drawY;
+	protected int finX;
+	protected int finY;
+	
+	protected int speed;
+	protected boolean idle = true;
+	protected boolean attacking = false;
 	
 	// 'U' for UP, 'D' for DOWN, 'L' for LEFT, 'R' for RIGHT
-	public char direction = 'R';
+	protected char direction = 'R';
 		
 //	public Room room;
 	
@@ -42,6 +49,7 @@ public class Entity {
 	public Entity(String name, int hp, int locationX, int locationY){
 		this.name = name;
 		this.hp = hp;
+		maxHp = hp;
 		this.locationX = locationX;
 		this.locationY = locationY;
 
@@ -53,7 +61,7 @@ public class Entity {
 	}
 	
 	// Moves to x and y coordinate provided, removes a move.
-	public void move(Room room){
+	public boolean move(Room room){
 		if(moves > 0){
 			// Obtain player location (probably better in enemy entity)
 			room.getPlayerX();
@@ -64,15 +72,17 @@ public class Entity {
 			//room.moveEntity(this, locationX-1, locationY);
 			
 			moves--;
-			
+			return true;
 			// Update map
 //			room.moveEntity(this,locationX, locationY);
 //			updateRoom(room);
 		}
+		return false;
 //		return room;
 	}
 	
 	public boolean canMove(Room room, int x, int y){
+		if(room.entityAt(x, y)) return false;
 		return true;
 	}
 	
@@ -125,6 +135,22 @@ public class Entity {
 		attacking = b;
 	}
 	
+	public void setDrawX(int x){
+		drawX = x;
+	}
+	
+	public void setDrawY(int y){
+		drawY = y;
+	}
+	
+	public void setFinX(int x){
+		finX = x;
+	}
+	
+	public void setFinY(int y){
+		finY = y;
+	}
+	
 	// Getters
 	
 	public SpriteSheet getIdleSheet(){
@@ -169,6 +195,21 @@ public class Entity {
 	public int getLocationY(){
 		return locationY;
 	}
+	
+	public int getDrawX(){
+		return drawX;
+	}
+	public int getDrawY(){
+		return drawY;
+	}
+	
+	public int getFinX(){
+		return finX;
+	}
+	public int getFinY(){
+		return finY;
+	}
+	
 	/*
 	public void updateRoom(Room room){
 		this.room = room;
