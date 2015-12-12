@@ -10,7 +10,8 @@ public class EntityPlayer extends Entity{
 						protagUp, idleUp, protagDown, idleDown,
 						slashRight, slashLeft, slashUp, slashDown;
 	private Animation walkRight, walkLeft, walkDown, walkUp;
-
+	
+	private int turns;
 	{
 		try{
 			protagRight = new SpriteSheet("protagImg/walkRight.png",100,100);
@@ -44,6 +45,7 @@ public class EntityPlayer extends Entity{
 	public EntityPlayer(String name, int hp, int locationX, int locationY) {
 		super(name, hp, locationX, locationY);
 		def = 90;
+		turns = 2;
 	}
 	
 	// Returns spritesheet based on direction the character is facing (see parent class for directions)
@@ -79,6 +81,7 @@ public class EntityPlayer extends Entity{
 	public Entity atkMelee(Room room, char direction){
 		this.setDirection(direction);
 		this.setAttacking(true);
+		turns--;
 		if (meleeHit(room, direction)) {
 			switch (direction) {
 			case 'U':
@@ -169,6 +172,7 @@ public class EntityPlayer extends Entity{
 	}
 	
 	public boolean move(Room room, char direction){
+		turns--;
 		this.direction = direction;
 		
 		switch(direction){
@@ -206,6 +210,14 @@ public class EntityPlayer extends Entity{
 		int dmg = atk-def;
 		hp -= dmg;
 		return hp;
+	}
+	
+	
+	public int getTurns(){
+		return turns;
+	}
+	public void refresh(){
+		turns = 2;
 	}
 	
 	

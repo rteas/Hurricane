@@ -156,6 +156,7 @@ public class BasicGame extends BasicGameState {
 		if(rm.isPlayerTurn()) g.drawString("Phase: player", 200, 40);
 		else g.drawString("Phase: enemy", 200, 40);
 		g.drawString("HP: "+ player.getHp(), 10, 60);
+		g.drawString("Turns: "+player.getTurns(), 10, 80);
 //		g.drawString("Hit: "+ entityHit + "!", 10, 50);
 		
 //		rockSheet.draw(getX(eo.getLocationX()), getY(eo.getLocationY()));
@@ -296,10 +297,17 @@ public class BasicGame extends BasicGameState {
 				player.setAttacking(false);
 			} 
 			else {
-				Input input = gc.getInput();
-				setMovePlayer(input);
-				getAttack(input);
+				if(player.getTurns() > 0){
+					Input input = gc.getInput();
+					setMovePlayer(input);
+					getAttack(input);
+				}
+				else{
+					rm.endPlayerTurn();
+					player.refresh();
+				}
 			} 
+			
 		}
 		
 		// else enemy phase/turn
@@ -555,7 +563,7 @@ public class BasicGame extends BasicGameState {
 
 	// Initial movement 'WASD'
 	public boolean setMovePlayer(Input input){
-		if(input.isKeyPressed(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){
+		if(input.isKeyDown(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)){
 			if(rm.movePlayer(UP)){
 				destinationY = playerY-tileSize;
 				player.setIdle(false);
@@ -563,7 +571,7 @@ public class BasicGame extends BasicGameState {
 				return true;
 			}
 		}
-		else if(input.isKeyPressed(Input.KEY_A) || input.isKeyPressed(Input.KEY_LEFT)){
+		else if(input.isKeyDown(Input.KEY_A) || input.isKeyPressed(Input.KEY_LEFT)){
 			if(rm.movePlayer(LEFT)){
 				destinationX = playerX-tileSize;
 				player.setIdle(false);
@@ -571,7 +579,7 @@ public class BasicGame extends BasicGameState {
 				return true;
 			}
 		}
-		else if(input.isKeyPressed(Input.KEY_S) || input.isKeyPressed(Input.KEY_DOWN)){
+		else if(input.isKeyDown(Input.KEY_S) || input.isKeyPressed(Input.KEY_DOWN)){
 			if (rm.movePlayer(DOWN)) {
 				destinationY = playerY + tileSize;
 				player.setIdle(false);
