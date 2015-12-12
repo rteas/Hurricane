@@ -14,7 +14,7 @@ public class Room {
 	*/
 	
 	private LinkedList<Entity> entities = new LinkedList<Entity>();
-	
+	private LinkedList<EntityEnemy> enemies = new LinkedList<EntityEnemy>();
 	private Tile[][] tileLayer;
 	private Entity[][] entityLayer;
 	private int xTiles;
@@ -43,7 +43,9 @@ public class Room {
 		}
 		entityLayer[entity.locationX][entity.locationY] = entity;
 		entities.add(entity);
-
+		if(entity instanceof EntityEnemy){
+			enemies.add((EntityEnemy)entity);
+		}
 		return true;
 	}
 	
@@ -161,11 +163,11 @@ public class Room {
 		return tileLayer[x][y].getTile();
 	}
 	
-	/*
+
 	public LinkedList<EntityEnemy> getEnemies(){
 		return enemies;
 	}
-	
+	/*
 	public LinkedList<EntityObstacle> getObstacles(){
 		return obstacles;
 	}

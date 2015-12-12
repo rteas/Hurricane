@@ -7,7 +7,9 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.state.BasicGameState;
@@ -69,6 +71,7 @@ public class BasicGame extends BasicGameState {
 	// For enemy drawing
 	private boolean enemyMoving = false;
 	private boolean enemyAttacking = false;
+	private boolean enemyInitialized = false;
 
 	
 	// Test
@@ -85,10 +88,21 @@ public class BasicGame extends BasicGameState {
 	public int getY(int y){
 		return y*tileSize+offsetY;
 	}
+	
+	// Music/Sound
+	private Music bgm;
+	private Sound swing;
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
+		
+		
+		bgm = new Music("music/bgm.ogg");
+		bgm.setVolume(0.5f);
+		bgm.loop();
+		
+		swing = new Sound("music/swing.ogg");
 		
 		// Debug, spawning, and stuff goes here...
 		room = new Room(11,7);
@@ -245,6 +259,7 @@ public class BasicGame extends BasicGameState {
 			
 		}
 		if(player.isAttacking()){
+			swing.play();
 			char pd = player.getDirection();
 			player.getIdleSheet().draw(getX(player.getLocationX()), getY(player.getLocationY()));
 			SpriteSheet atk = player.getAttackSheet();
@@ -288,12 +303,18 @@ public class BasicGame extends BasicGameState {
 		
 		// else enemy phase/turn
 		else{
+
+			
 			/* WARNING COMPLEX */
 			// Basically try to cover all the cases of
 			// Enemies moving and attacking independently
 			// Along with proper rendering flags
+			// Actually pretty hard to draw in fake time...
 			
 			// enemies moving and attacking
+			
+			
+
 			if(enemyMoving && enemyAttacking){
 				for(Entity e: room.getEntities()){
 					if(e instanceof EntityEnemy){
@@ -301,7 +322,8 @@ public class BasicGame extends BasicGameState {
 						en = (EntityEnemy)e;
 						moveEnemy(en, d);
 						
-						if(!enemyMoving && en.canAttack(room)){
+						if(e.isIdle() && en.canAttack(room)){
+							swing.play();
 							en.hitPlayer(room);
 							en.setAttacking(true);
 						}
@@ -323,6 +345,7 @@ public class BasicGame extends BasicGameState {
 						if (e instanceof EntityEnemy) {
 							EntityEnemy en = (EntityEnemy) e;
 							if (en.canAttack(room)) {
+								swing.play();
 								en.hitPlayer(room);
 								enemyAttacking = true;
 								en.setAttacking(true);
@@ -336,7 +359,8 @@ public class BasicGame extends BasicGameState {
 			}
 			else if(enemyAttacking){
 				for(Entity e: room.getEntities()){
-					if(e instanceof EntityEnemy && e.isIdle()){
+					if(e instanceof EntityEnemy && e.isAttacking()){
+						swing.play();
 						gc.sleep(200);
 						e.setAttacking(false);
 					}
@@ -347,6 +371,7 @@ public class BasicGame extends BasicGameState {
 					rm.startPlayerTurn();
 				}
 			}
+
 			// Actual movement on grid (moves once)
 			else{
 				for(Entity e : room.getEntities()){
@@ -354,9 +379,11 @@ public class BasicGame extends BasicGameState {
 						EntityEnemy en = (EntityEnemy)e;
 						
 						if(en.canAttack(room)){
+							
 							en.hitPlayer(room);
 							en.setAttacking(true);
 							enemyAttacking = true;
+							
 						}
 						else if(en.move(room)){
 							setMoveEnemy(en);
@@ -371,6 +398,7 @@ public class BasicGame extends BasicGameState {
 			
 			
 		}
+		
 		
 
 
