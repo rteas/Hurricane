@@ -97,10 +97,11 @@ public class BasicGame extends BasicGameState {
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// TODO Auto-generated method stub
 		
-		
+		/*
 		bgm = new Music("music/bgm.ogg");
 		bgm.setVolume(0.5f);
 		bgm.loop();
+		*/
 		
 		swing = new Sound("music/swing.ogg");
 		
