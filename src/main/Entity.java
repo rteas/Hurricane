@@ -94,25 +94,14 @@ public class Entity {
 		return false;
 	}
 	
-	public void updateEntity(Room room){
-		if(this.defeated()){
-			room.deleteEntity(locationX, locationY);
-		}
-	}
-	
-	
 	// Default method called when hit
 	public int onHit(Room room,int atk){
 		int dmg = atk-def;
 		hp = hp - dmg;
 		if(hp <= 0){
-			updateEntity(room);
+			room.deleteEntity(locationX, locationY);
 		}
 		return dmg;
-	}
-	
-	public boolean defeated(){
-		return hp <= 0;
 	}
 	
 	// Setters
